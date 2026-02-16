@@ -52,6 +52,14 @@
     .btn-logout {
       padding: 8px 16px;
       font-size: 0.9rem;
+      background: transparent;
+      border: 2px solid var(--white);
+      color: var(--white);
+    }
+
+    .btn-logout:hover {
+      background: var(--white);
+      color: var(--navy-dark);
     }
   </style>
 </head>
@@ -112,10 +120,10 @@
         const tierLabel = userTier === 'unpaid' ? 'Free User' : 'Premium User';
         userMenu.innerHTML = `
           <div class="user-info">
-            <span style="color: var(--white);">${localStorage.getItem('userEmail')}</span>
+            <span style="color: var(--white); font-size: 0.9rem;">${localStorage.getItem('userEmail')}</span>
             <span class="user-tier-badge tier-${userTier}">${tierLabel}</span>
           </div>
-          <button class="btn btn-outline btn-logout" onclick="logout()">Logout</button>
+          <button class="btn btn-logout" onclick="logout()">Logout</button>
         `;
       } else {
         userMenu.innerHTML = `
