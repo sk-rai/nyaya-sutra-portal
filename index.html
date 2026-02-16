@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nyaya Sutra | Legal Case Management</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/tiers.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap"
+    rel="stylesheet">
+  <style>
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .user-tier-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .user-tier-badge.tier-unregistered {
+      background: var(--gray-light);
+      color: var(--gray-dark);
+    }
+
+    .user-tier-badge.tier-unpaid {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .user-tier-badge.tier-paid {
+      background: var(--success);
+      color: var(--white);
+    }
+
+    .btn-logout {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <svg width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="18" fill="var(--navy-dark)" stroke="var(--gold-primary)" stroke-width="2" />
+            <text x="20" y="25" font-family="Inter" font-size="14" fill="var(--gold-primary)"
+              text-anchor="middle">⚖️</text>
+          </svg>
+          <span class="logo-text">Nyaya Sutra</span>
+        </div>
+        <nav class="nav">
+          <div class="user-menu" id="userMenu">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Case Search Section -->
+  <section class="case-search">
+    <div class="container">
+      <div class="search-box">
+        <h2>Search Cases</h2>
+
+        <div class="search-form">
+          <input type="text" placeholder="Enter case number or party name..." class="search-input">
+          <button class="btn btn-primary">Search</button>
+        </div>
+
+        <!-- Case Results (Dynamic) -->
+        <div class="case-results" id="caseResults">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/auth.js"></script>
+  <script src="js/tier-renderer.js"></script>
+  <script src="js/print-control.js"></script>
+  <script>
+    // Initialize page based on user tier
+    document.addEventListener('DOMContentLoaded', () => {
+      const { isLoggedIn, userTier } = checkAuth();
+      const userMenu = document.getElementById('userMenu');
+
+      // Update user menu
+      if (isLoggedIn) {
+        const tierLabel = userTier === 'unpaid' ? 'Free User' : 'Premium User';
+        userMenu.innerHTML = `
+          <div class="user-info">
+            <span style="color: var(--white);">${localStorage.getItem('userEmail')}</span>
+            <span class="user-tier-badge tier-${userTier}">${tierLabel}</span>
+          </div>
+          <button class="btn btn-outline btn-logout" onclick="logout()">Logout</button>
+        `;
+      } else {
+        userMenu.innerHTML = `
+          <button class="btn btn-outline" onclick="window.location.href='login.html'">Login / Register</button>
+        `;
+      }
+
+      // Render case cards
+      renderCaseCards();
+    });
+
+    function renderCaseCards() {
+      const userTier = localStorage.getItem('userTier') || 'unregistered';
+      const caseResults = document.getElementById('caseResults');
+
+      const cases = [
+        {
+          number: "AFT/DEL/2023/1234",
+          date: "15 Feb 2026",
+          title: "Rajesh Kumar vs. Union of India",
+          bench: "Justice A. Sharma",
+          type: "Service Matter",
+          status: "For Hearing",
+          counsel: "Adv. S. Patel",
+          venue: "Court Room No. 5"
+        },
+        {
+          number: "CGAT/DEL/2024/5678",
+          date: "18 Feb 2026",
+          title: "Suresh Patel vs. Ministry of Defence",
+          bench: "Justice B. Mehta",
+          type: "Pension Dispute",
+          status: "Disposed",
+          counsel: "Adv. R. Singh",
+          venue: "Court Room No. 3"
+        },
+        {
+          number: "AFT/DEL/2023/9012",
+          date: "20 Feb 2026",
+          title: "Meena Devi vs. Indian Army",
+          bench: "Justice C. Reddy",
+          type: "Service Matter",
+          status: "For Hearing",
+          counsel: "Adv. P. Kumar",
+          venue: "Court Room No. 7"
+        }
+      ];
+
+      caseResults.innerHTML = '';
+
+      cases.forEach(caseItem => {
+        const card = document.createElement('div');
+        card.className = `case-card tier-${userTier}`;
+
+        let html = `
+          <div class="case-header">
+            <span class="case-number">${caseItem.number}</span>
+            <span class="case-date">${caseItem.date}</span>
+          </div>
+          <div class="case-title">
+            <span>${caseItem.title}</span>
+          </div>
+        `;
+
+        // Unpaid+ content
+        if (userTier === 'unpaid' || userTier === 'paid') {
+          html += `
+            <div class="case-bench">Bench: ${caseItem.bench}</div>
+            <div class="case-type">Type: ${caseItem.type}</div>
+            <div class="case-status status-${caseItem.status.toLowerCase().replace(' ', '-')}">
+              ${caseItem.status}
+            </div>
+          `;
+        }
+
+        // Paid-only content
+        if (userTier === 'paid') {
+          html += `
+            <div class="case-counsel">Counsel: ${caseItem.counsel}</div>
+            <div class="case-venue">Venue: ${caseItem.venue}</div>
+          `;
+        }
+
+        // CTA buttons
+        if (userTier === 'unregistered') {
+          html += `
+            <div class="case-cta">
+              <button class="btn btn-outline btn-sm" onclick="window.location.href='login.html'">Login to View Details</button>
+              <span class="lock-icon">🔒</span>
+            </div>
+          `;
+        } else if (userTier === 'unpaid') {
+          html += `
+            <div class="case-cta">
+              <button class="btn btn-outline btn-sm" onclick="showUpgradeModal()">Unlock Full Access</button>
+              <span class="lock-icon">🔒</span>
+              <span class="upgrade-prompt">Upgrade to see counsel & venue</span>
+            </div>
+          `;
+        } else if (userTier === 'paid') {
+          html += `
+            <div class="case-cta">
+              <button class="btn-print" onclick="window.print()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 9V2H18V9M6 15H4V22H20V15H18M18 9H6V15H18V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Print
+              </button>
+              <button class="btn-copy" onclick="copyCase('${caseItem.number}', '${caseItem.title}')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M8 8C8 6.89543 8.89543 6 10 6H18C19.1046 6 20 6.89543 20 8V16C20 17.1046 19.1046 18 18 18H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 4H8C6.89543 4 6 4.89543 6 6V14C6 15.1046 6.89543 16 8 16H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Copy
+              </button>
+            </div>
+          `;
+        }
+
+        card.innerHTML = html;
+        caseResults.appendChild(card);
+      });
+    }
+
+    function copyCase(number, title) {
+      const text = `${number} - ${title}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Case details copied to clipboard!');
+      });
+    }
+  </script>
+</body>
+
+</html>

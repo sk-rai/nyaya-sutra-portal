@@ -1,0 +1,204 @@
+/* ========================================
+   TIER-SPECIFIC STYLES
+   ======================================== */
+
+/* Unregistered Tier */
+body.tier-unregistered {
+  /* No special body styles needed */
+}
+
+.tier-unregistered .case-card {
+  background: var(--gray-light);
+  border: 1px dashed var(--gray-medium);
+  opacity: 0.8;
+}
+
+.tier-unregistered .case-card .case-title .title-truncated {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.tier-unregistered .case-card .lock-icon {
+  font-size: 1.2rem;
+  margin-right: 8px;
+  color: var(--gray-medium);
+}
+
+.tier-unregistered .case-card .upgrade-prompt {
+  font-size: 0.85rem;
+  color: var(--gray-medium);
+  font-style: italic;
+}
+
+.tier-unregistered .btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Unpaid Registered Tier */
+body.tier-unpaid {
+  /* No special body styles needed */
+}
+
+.tier-unpaid .case-card {
+  background: var(--white);
+  border: 1px solid var(--gray-light);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.tier-unpaid .case-card .case-bench,
+.tier-unpaid .case-card .case-type,
+.tier-unpaid .case-card .case-status {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--gray-dark);
+}
+
+.tier-unpaid .case-card .case-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.tier-unpaid .case-card .case-status.status-hearing {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.tier-unpaid .case-card .case-status.status-disposed {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.tier-unpaid .case-card .case-cta {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-unpaid .case-card .upgrade-prompt {
+  font-size: 0.85rem;
+  color: var(--gray-medium);
+}
+
+.tier-unpaid .case-card .lock-icon {
+  font-size: 1.2rem;
+  color: var(--gray-medium);
+}
+
+/* Print/Copy buttons disabled for unpaid */
+.tier-unpaid .btn-print,
+.tier-unpaid .btn-copy {
+  display: none;
+}
+
+/* Paid Tier */
+body.tier-paid {
+  /* No special body styles needed */
+}
+
+.tier-paid .case-card {
+  background: var(--white);
+  border: 1px solid var(--navy-light);
+  box-shadow: 0 4px 12px rgba(10, 25, 47, 0.1);
+  transition: all 0.3s ease;
+}
+
+.tier-paid .case-card:hover {
+  box-shadow: 0 6px 16px rgba(10, 25, 47, 0.15);
+  transform: translateY(-2px);
+}
+
+.tier-paid .case-card .case-bench,
+.tier-paid .case-card .case-type,
+.tier-paid .case-card .case-status,
+.tier-paid .case-card .case-counsel,
+.tier-paid .case-card .case-venue {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--gray-dark);
+}
+
+.tier-paid .case-card .case-counsel,
+.tier-paid .case-card .case-venue {
+  color: var(--navy-dark);
+  font-weight: 500;
+}
+
+.tier-paid .case-card .case-cta {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tier-paid .btn-print,
+.tier-paid .btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--navy-medium);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tier-paid .btn-print:hover,
+.tier-paid .btn-copy:hover {
+  background: var(--navy-dark);
+}
+
+.tier-paid .btn-print svg,
+.tier-paid .btn-copy svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Upgrade Button Styling */
+#upgrade-btn {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+  color: var(--navy-dark);
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+#upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
+}
+
+/* User Tier Badge */
+#user-tier-badge {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+#user-tier-badge.tier-unregistered {
+  background: var(--gray-light);
+  color: var(--gray-dark);
+}
+
+#user-tier-badge.tier-unpaid {
+  background: #fff3cd;
+  color: #856404;
+}
+
+#user-tier-badge.tier-paid {
+  background: var(--success);
+  color: var(--white);
+}

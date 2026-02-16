@@ -1,0 +1,20 @@
+{
+    "name": "nyaya-sutra-portal",
+    "version": "1.0.0",
+    "description": "Legal Case Management Portal - Frontend Mockup",
+    "main": "public/index.html",
+    "scripts": {
+        "start": "serve public",
+        "dev": "serve public"
+    },
+    "keywords": [
+        "legal",
+        "case-management",
+        "portal"
+    ],
+    "author": "Santosh Rai",
+    "license": "MIT",
+    "devDependencies": {
+        "serve": "^14.2.0"
+    }
+}
