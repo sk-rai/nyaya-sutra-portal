@@ -61,6 +61,12 @@ else
     echo "  ❌ sandbox.config.json missing!"
 fi
 
+if [ -f "public/_redirects" ]; then
+    echo "  ✅ public/_redirects"
+else
+    echo "  ❌ public/_redirects missing!"
+fi
+
 # Check documentation
 echo ""
 echo "✓ Checking documentation..."

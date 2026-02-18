@@ -1,0 +1,10 @@
+# Redirects in public folder
+/  /dashboard.html  301!
+
+# Fallback for SPA routing if needed (though this is multi-page)
+# /*  /index.html  200
+
+# Ensure specific pages work even if extension is omitted (optional, but good practice)
+/dashboard  /dashboard.html  200
+/register   /register.html   200
+/login      /login.html      200
