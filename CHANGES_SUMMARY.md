@@ -1,158 +1,319 @@
-# Changes Summary - Frontend Mockup Ready
+# Quick Changes Summary - Client Mockups
 
-## ✅ What Was Fixed
-
-### 1. JavaScript File Organization
-**Problem**: Files had mismatched content and names
-- `auth.js` had tier rendering code
-- `tier-renderer.js` had print control code  
-- `print-control.js` had auth code
-
-**Solution**: Reorganized all three files with correct content:
-- **auth.js**: Now handles authentication, login, logout, and user session
-- **tier-renderer.js**: Now handles case card rendering and tier-specific display
-- **print-control.js**: Now handles print/copy restrictions and security
-
-### 2. Login Page Created
-**Problem**: `login.html` was empty
-
-**Solution**: Built complete login page with:
-- Professional design matching the portal theme
-- Demo credentials clearly displayed
-- Mock authentication system
-- Form validation and error handling
-- Responsive layout
-
-### 3. Dynamic Index Page
-**Problem**: `index.html` had static hardcoded content
-
-**Solution**: Made it fully dynamic:
-- User menu shows login status and tier badge
-- Case cards render based on user tier
-- Login/logout functionality
-- Automatic tier detection
-- Three different views (unregistered/unpaid/paid)
-
-### 4. Documentation Added
-Created three new documentation files:
-- **README.md**: Complete project overview and setup instructions
-- **DEMO_GUIDE.md**: Step-by-step client demo walkthrough
-- **CHANGES_SUMMARY.md**: This file
-
-## 🎯 Current State
-
-### Fully Functional Features
-✅ Tier-based access control (3 levels)
-✅ Mock authentication system
-✅ Dynamic case rendering
-✅ User session management
-✅ Login/logout flow
-✅ Print/copy restrictions
-✅ Professional UI/UX
-✅ Responsive design
-✅ All pages working
-
-### Demo-Ready Files
-- `index.html` - Main case search page (dynamic)
-- `login.html` - Login page with demo credentials
-- `dashboard.html` - Landing page with features/pricing
-- All CSS files (base, components, tiers)
-- All JS files (auth, tier-renderer, print-control)
-
-## 🧪 Testing Instructions
-
-### Test Scenario 1: Unregistered User
-1. Open `index.html` in browser
-2. Should see limited case info (number + date only)
-3. "Login to View Details" button visible
-
-### Test Scenario 2: Free User
-1. Click login, use `unpaid@example.com`
-2. Should see: number, date, bench, type, status
-3. Counsel and venue should be locked
-4. "Unlock Full Access" button visible
-
-### Test Scenario 3: Premium User
-1. Logout and login with `paid@example.com`
-2. Should see all fields including counsel and venue
-3. Print and Copy buttons functional
-4. No upgrade prompts
-
-### Test Scenario 4: Session Persistence
-1. Login as any user
-2. Refresh page
-3. Should remain logged in with same tier
-
-## 📦 Deployment Ready
-
-### For CodeSandbox:
-```bash
-# Option 1: GitHub Import (Recommended)
-git init
-git add .
-git commit -m "Frontend mockup complete"
-git remote add origin YOUR_REPO_URL
-git push -u origin main
-
-# Then import in CodeSandbox from GitHub
-```
-
-### For Local Testing:
-```bash
-# Python
-python -m http.server 8000
-
-# Node.js
-npx serve .
-
-# Then open: http://localhost:8000
-```
-
-## 🎨 Design Consistency
-
-All pages now follow:
-- Navy (#0a192f) + Gold (#ffd700) color scheme
-- Inter font for UI, Merriweather for headings
-- Consistent spacing and shadows
-- Professional legal aesthetic
-- Responsive card-based layouts
-
-## 🔐 Security Features
-
-- Client-side tier enforcement (demo only)
-- Print/copy disabled for non-paid users
-- Right-click protection for unpaid users
-- Session management via localStorage
-- Ready for backend JWT integration
-
-## 📊 File Statistics
-
-- **HTML Files**: 3 (index, login, dashboard)
-- **CSS Files**: 3 (base, components, tiers)
-- **JS Files**: 3 (auth, tier-renderer, print-control)
-- **Documentation**: 3 (README, DEMO_GUIDE, CHANGES_SUMMARY)
-- **Total Lines**: ~800 lines of code
-
-## 🚀 Next Steps (When Ready)
-
-1. Deploy to CodeSandbox for client demo
-2. Get client approval on design and flow
-3. Begin backend development (Flask/FastAPI)
-4. Implement real authentication (JWT)
-5. Add database models
-6. Integrate PDF scraping
-7. Build SMS/WhatsApp alerts
-
-## ✨ Ready for Demo!
-
-The frontend mockup is complete and fully functional. All three tier levels work correctly, the login system is in place, and the UI is polished and professional.
-
-**Demo Credentials:**
-- Unpaid: `unpaid@example.com` / `demo123`
-- Paid: `paid@example.com` / `demo123`
+**Date:** February 18, 2026
 
 ---
 
-**Status**: ✅ Frontend Complete  
-**Date**: February 15, 2026  
-**Ready for**: Client Demo & Deployment
+## 🎯 At a Glance
+
+### Screens Analysis:
+- **1 New Screen:** Registration page
+- **2 New Features:** Personalized Dashboard, Calendar View
+- **3 Modified Screens:** Landing, Login, Case Search
+
+---
+
+## 📋 Screen-by-Screen Changes
+
+### 1️⃣ Landing Page (dashboard.html) - MODIFY ✏️
+
+**What Changes:**
+- Hero title → More specific for legal professionals
+- Add 4 user personas with icons (Defense, BSF, Central Gov, Individuals)
+- Pricing → Split into "Individuals" vs "Legal Professionals"
+- Features → Emphasize SMS/WhatsApp alerts
+
+**Why:**
+Client wants to target specific user groups clearly
+
+**Effort:** 2-3 hours
+
+---
+
+### 2️⃣ Login Page (login.html) - MAJOR CHANGES ✏️
+
+**What Changes:**
+- Email/Password → Email OR Phone + OTP
+- Add Captcha field
+- Add "Register" link
+- Create NEW registration page with:
+  - User type (Individual/Advocate)
+  - Full contact details
+  - Plan selection (3 boxes)
+  - Advocate fields (enrollment, bar council)
+
+**Why:**
+Client wants OTP-based authentication and proper registration
+
+**Effort:** 4-6 hours (UI), 1-2 days (with backend)
+
+---
+
+### 3️⃣ User Dashboard - NEW PAGE 🆕
+
+**What's New:**
+- Personalized greeting: "Hi, Mr. [Name]"
+- "My Cases" section to add/manage cases
+- Court selector buttons (AFT, CAT, High Court, Supreme)
+- Search within user's cases
+- Orders/Judgements display
+- Synopsis section
+
+**Why:**
+Client wants users to manage their own case portfolio
+
+**Effort:** 6-8 hours (UI), 2-3 days (with backend)
+
+---
+
+### 4️⃣ Calendar & List View - NEW FEATURE 🆕
+
+**What's New:**
+- Table view for cases (not just cards)
+- Calendar view with hearing dates
+- Court filter tabs
+- Location filters (Delhi, Mumbai, Jaipur)
+- "Offbeat Benches" filter
+- News ticker section
+
+**Why:**
+Client wants advanced case tracking and calendar features
+
+**Effort:** 8-10 hours (UI), 3-4 days (with backend)
+
+---
+
+## 🔄 Key Functional Changes
+
+### Authentication Flow:
+```
+BEFORE:
+Login → Email + Password → Dashboard
+
+AFTER:
+Login → Email/Phone + Captcha → OTP → Personalized Dashboard
+Register → User Type → Details → Plan Selection → OTP → Dashboard
+```
+
+### User Journey:
+```
+BEFORE:
+Visitor → Login → Search Cases → View (based on tier)
+
+AFTER:
+Visitor → Register (with user type) → Login (OTP) → My Dashboard → 
+  → Add My Cases → Search My Cases → View Calendar → Read News
+```
+
+### Pricing Structure:
+```
+BEFORE:
+- Personal: ₹110/month
+- Advocate: ₹360/month  
+- Premium: ₹1,200/month
+
+AFTER:
+INDIVIDUALS:
+- Own case tracking: ~₹50
+- Orders/Judgements: ~₹50
+- Case search & alerts: ~₹50
+
+LEGAL PROFESSIONALS:
+- 500 cases: ₹360/month
+- Unlimited cases: ₹1,200/month
+- Includes: tracking, judgements, search, alerts, calendar
+```
+
+---
+
+## 🆕 New Components Needed
+
+1. **Court Selector Buttons** - [AFT] [CAT] [HighCourt] [Supreme]
+2. **OTP Input** - 6-digit code entry
+3. **Captcha** - Image + input field
+4. **User Type Radio** - Individual / Advocate
+5. **Plan Selection Boxes** - 3 visual boxes
+6. **Case Add Form** - Quick add case to "My Cases"
+7. **Table View** - Alternative to card view
+8. **Calendar Widget** - Monthly view with hearing dates
+9. **Location Filters** - City-based filtering
+10. **News Ticker** - Scrolling news feed
+11. **Bar Council Dropdown** - For advocates only
+12. **Advocate Fields** - Conditional form fields
+
+---
+
+## 📊 Comparison Table
+
+| Feature | Current | Required | Change Type |
+|---------|---------|----------|-------------|
+| **Landing Page** | Generic | User persona-focused | ✏️ Modify |
+| **Login Method** | Email/Password | Email/Phone + OTP | ✏️ Major |
+| **Registration** | None | Full form with user type | 🆕 New |
+| **User Dashboard** | Generic search | Personalized "My Cases" | 🆕 New |
+| **Case View** | Cards only | Cards + Table | ✏️ Add |
+| **Court Filters** | None | AFT/CAT/HC/SC buttons | 🆕 New |
+| **Calendar** | None | Monthly view with dates | 🆕 New |
+| **Location Filter** | None | Delhi/Mumbai/Jaipur | 🆕 New |
+| **News** | None | News ticker | 🆕 New |
+| **User Types** | Generic tiers | Individual vs Advocate | ✏️ Major |
+| **Pricing** | 3 tiers | Per-feature for individuals | ✏️ Modify |
+| **Case Management** | View only | Add/Edit/Delete | 🆕 New |
+| **Orders/Judgements** | None | Dedicated section | 🆕 New |
+| **Synopsis** | None | Judgement synopsis | 🆕 New |
+
+---
+
+## 🎨 Design Changes
+
+### Color Scheme:
+- Keep existing navy (#0a192f) + gold (#ffd700)
+- Add court-specific colors (optional):
+  - AFT: Blue
+  - CAT: Green
+  - High Court: Purple
+  - Supreme Court: Red/Maroon
+
+### Layout Changes:
+- Landing: Add persona icons section
+- Login: Vertical form with OTP flow
+- Dashboard: Multi-section layout (My Cases, Search, Orders, Synopsis)
+- Calendar: Tabbed interface with filters
+
+### Typography:
+- Keep Inter + Merriweather
+- Add emphasis on user greeting (larger, bold)
+
+---
+
+## 🔧 Technical Changes
+
+### Frontend:
+- Add 4 new HTML pages
+- Add 4 new CSS files
+- Add 5 new JS files
+- Update 3 existing pages
+- Create 12 new components
+
+### Backend (Required):
+- OTP generation/verification API
+- User registration with type validation
+- Case CRUD operations
+- Court calendar data
+- News feed integration
+- Bar Council validation (optional)
+- Phone number verification
+
+### Third-Party Services:
+- OTP provider (Twilio/MSG91)
+- Captcha service (Google reCAPTCHA)
+- Payment gateway (Razorpay/Stripe)
+- News API (optional)
+
+---
+
+## ⚠️ Important Notes
+
+### Must-Have Features (Phase 1):
+1. ✅ Updated landing page
+2. ✅ OTP-based login
+3. ✅ Registration with user type
+4. ✅ Personalized dashboard
+5. ✅ "My Cases" management
+6. ✅ Court selector buttons
+
+### Nice-to-Have Features (Phase 2):
+7. ⭐ Calendar view
+8. ⭐ Table view for cases
+9. ⭐ Location filters
+10. ⭐ News ticker
+11. ⭐ Orders/Judgements section
+12. ⭐ Synopsis display
+
+### Backend-Dependent:
+- OTP authentication (can't demo without backend)
+- Case management (can use mock data initially)
+- Calendar data (can use mock data initially)
+- News feed (can use static content initially)
+
+---
+
+## 💰 Cost Implications
+
+### Development:
+- Frontend only: 4-5 days
+- With backend: 2-3 weeks
+
+### Third-Party Services (Monthly):
+- OTP service: ₹500-2,000 (based on volume)
+- Captcha: Free (Google reCAPTCHA)
+- Payment gateway: 2% transaction fee
+- Hosting: ₹500-2,000 (Netlify/Vercel/AWS)
+
+### Maintenance:
+- Court data updates: Manual or automated scraping
+- News feed: Manual or API integration
+- User support: Based on user base
+
+---
+
+## 🚀 Recommended Next Steps
+
+### Immediate (This Week):
+1. ✅ Get client approval on this analysis
+2. ✅ Clarify must-have vs nice-to-have features
+3. ✅ Decide: Prototype or full implementation?
+4. ✅ Choose OTP provider and payment gateway
+
+### Short-term (Next 2 Weeks):
+5. ✅ Update landing page with new content
+6. ✅ Build registration page
+7. ✅ Update login with OTP flow (UI only)
+8. ✅ Create personalized dashboard
+9. ✅ Add court selector buttons
+
+### Medium-term (Next Month):
+10. ✅ Integrate backend APIs
+11. ✅ Add calendar view
+12. ✅ Add table view
+13. ✅ Add news section
+14. ✅ Testing and deployment
+
+---
+
+## 📞 Questions to Ask Client
+
+1. **Priority:** Which features are must-have for launch?
+2. **Timeline:** When do you need this live?
+3. **Budget:** Frontend mockup or full implementation?
+4. **OTP:** Which provider? (Twilio, MSG91, other?)
+5. **Payment:** Which gateway? (Razorpay, Stripe, PayU?)
+6. **Court Data:** Do you have API access or need scraping?
+7. **Bar Council:** Real validation needed or just dropdown?
+8. **News:** Where should news come from?
+9. **Hosting:** Any preference? (AWS, Netlify, Vercel?)
+10. **Mobile App:** Is this planned for future?
+
+---
+
+## ✅ Summary
+
+**Total Changes:**
+- 1 new registration page
+- 2 new major features (dashboard, calendar)
+- 3 modified existing pages
+- 12 new UI components
+- Backend integration required for full functionality
+
+**Effort:**
+- Frontend prototype: 1 week
+- Full implementation: 3 weeks
+
+**Status:** Ready to start once priorities are confirmed
+
+---
+
+**Prepared by:** Kiro AI Assistant  
+**Date:** February 18, 2026  
+**Status:** ✅ Analysis Complete - Awaiting Client Approval
+
