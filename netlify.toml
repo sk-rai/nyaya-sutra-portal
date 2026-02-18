@@ -2,12 +2,11 @@
   publish = "public"
   command = "echo 'No build needed - static site'"
 
+# Redirect root to dashboard (landing page)
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
-  conditions = {Role = ["admin"]}
+  from = "/"
+  to = "/dashboard.html"
+  status = 301
 
 # Serve all files from public directory
 [[headers]]
