@@ -192,6 +192,29 @@
         .back-link a:hover {
             color: var(--navy-dark);
         }
+
+        .otp-input-container {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .otp-digit {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .otp-digit:focus {
+            outline: none;
+            border-color: var(--navy-dark);
+            box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
+        }
     </style>
 </head>
 
@@ -209,37 +232,63 @@
                     </svg>
                     <span class="login-logo-text">Nyaya Sutra</span>
                 </div>
-                <h1 class="login-title">Welcome Back</h1>
-                <p class="login-subtitle">Sign in to access your legal case dashboard</p>
+                <h1 class="login-title">Sign In</h1>
+                <p class="login-subtitle">For entry to Personalized Page</p>
             </div>
 
             <!-- Demo Credentials Box -->
             <div class="demo-credentials">
                 <h4>🎯 Demo Credentials (For Testing)</h4>
-                <p><strong>Unpaid User:</strong> <code>unpaid@example.com</code></p>
-                <p><strong>Paid User:</strong> <code>paid@example.com</code></p>
-                <p><strong>Password:</strong> <code>demo123</code> (any password works)</p>
+                <p><strong>Email/Phone:</strong> <code>unpaid@example.com</code> or <code>+91 9999999999</code></p>
+                <p><strong>Paid User:</strong> <code>paid@example.com</code> or <code>+91 8888888888</code></p>
+                <p><strong>Note:</strong> OTP will be auto-filled for demo (any 6 digits work)</p>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com"
-                        required>
+                    <label for="emailOrPhone" class="form-label">Email ID / Phone No</label>
+                    <input type="text" id="emailOrPhone" name="emailOrPhone" class="form-input"
+                        placeholder="your@email.com or +91 XXXXX XXXXX" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input"
-                        placeholder="Enter your password" required>
+                <div class="form-group" id="captchaGroup">
+                    <label for="captcha" class="form-label">Captcha</label>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div
+                            style="flex: 1; background: var(--gray-light); padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; letter-spacing: 3px; font-size: 1.2rem;">
+                            <span id="captchaText">AB12CD</span>
+                        </div>
+                        <button type="button" onclick="refreshCaptcha()"
+                            style="padding: 0.875rem; border: 2px solid var(--gray-light); background: white; border-radius: 8px; cursor: pointer;">
+                            ↻
+                        </button>
+                    </div>
+                    <input type="text" id="captcha" name="captcha" class="form-input" placeholder="Enter captcha"
+                        required style="margin-top: 0.5rem;">
+                </div>
+
+                <div class="form-group" id="otpGroup" style="display: none;">
+                    <label for="otp" class="form-label">Enter OTP</label>
+                    <div class="otp-input-container">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="0">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="1">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="2">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="3">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="4">
+                        <input type="text" maxlength="1" class="otp-digit" data-index="5">
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--gray-medium); margin-top: 0.5rem;">
+                        OTP sent to your email/phone. <a href="#" onclick="resendOTP(); return false;"
+                            style="color: var(--navy-dark);">Resend OTP</a>
+                    </p>
                 </div>
 
                 <div class="form-error" id="loginError">
-                    Invalid credentials. Please use demo credentials above.
+                    Invalid credentials or captcha. Please try again.
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-login">
-                    Sign In
+                <button type="submit" class="btn btn-primary btn-login" id="loginBtn">
+                    Send OTP
                 </button>
             </form>
 
@@ -248,7 +297,7 @@
             </div>
 
             <div class="register-link">
-                <p>Don't have an account? <a href="#" onclick="handleRegister(event)">Register for Free</a></p>
+                <p>New user? <a href="register.html">Register / Sign Up</a></p>
             </div>
 
             <div class="back-link">
@@ -259,32 +308,110 @@
 
     <script src="js/auth.js"></script>
     <script>
+        let otpSent = false;
+        let currentCaptcha = 'AB12CD';
+
+        // OTP input handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const otpInputs = document.querySelectorAll('.otp-digit');
+
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+            });
+        });
+
+        function refreshCaptcha() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let captcha = '';
+            for (let i = 0; i < 6; i++) {
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            currentCaptcha = captcha;
+            document.getElementById('captchaText').textContent = captcha;
+        }
+
+        function resendOTP() {
+            alert('OTP resent successfully! (Demo mode - any 6 digits work)');
+        }
+
         function handleLogin(event) {
             event.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('loginError');
-
-            // Hide error initially
             errorDiv.classList.remove('show');
 
-            // Attempt login
-            const success = login(email, password);
+            if (!otpSent) {
+                // Step 1: Verify captcha and send OTP
+                const emailOrPhone = document.getElementById('emailOrPhone').value;
+                const captchaInput = document.getElementById('captcha').value.toUpperCase();
 
-            if (!success) {
-                errorDiv.classList.add('show');
+                if (captchaInput !== currentCaptcha) {
+                    errorDiv.textContent = 'Invalid captcha. Please try again.';
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                // Hide captcha, show OTP
+                document.getElementById('captchaGroup').style.display = 'none';
+                document.getElementById('otpGroup').style.display = 'block';
+                document.getElementById('loginBtn').textContent = 'Verify & Sign In';
+                otpSent = true;
+
+                // Auto-fill OTP for demo
+                setTimeout(() => {
+                    const otpInputs = document.querySelectorAll('.otp-digit');
+                    '123456'.split('').forEach((digit, index) => {
+                        otpInputs[index].value = digit;
+                    });
+                }, 500);
+
+            } else {
+                // Step 2: Verify OTP and login
+                const otpInputs = document.querySelectorAll('.otp-digit');
+                const otp = Array.from(otpInputs).map(input => input.value).join('');
+
+                if (otp.length !== 6) {
+                    errorDiv.textContent = 'Please enter complete OTP.';
+                    errorDiv.classList.add('show');
+                    return;
+                }
+
+                const emailOrPhone = document.getElementById('emailOrPhone').value;
+
+                // Mock login logic
+                let tier = 'unpaid';
+                let email = emailOrPhone;
+
+                if (emailOrPhone.includes('paid') || emailOrPhone.includes('8888')) {
+                    tier = 'paid';
+                    email = 'paid@example.com';
+                } else {
+                    email = 'unpaid@example.com';
+                }
+
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userTier', tier);
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userName', tier === 'paid' ? 'Mr. ABC Singh' : 'Mr. John Doe');
+
+                // Redirect to dashboard
+                window.location.href = 'my-dashboard.html';
             }
         }
 
         function handleRegister(event) {
             event.preventDefault();
-
-            // For demo, just register as unpaid user
-            const email = prompt('Enter your email address:');
-            if (email) {
-                register(email, 'demo123', 'unpaid');
-            }
+            window.location.href = 'register.html';
         }
     </script>
 </body>
