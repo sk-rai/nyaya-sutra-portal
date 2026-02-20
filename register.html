@@ -290,6 +290,24 @@
                         required>
                 </div>
 
+                <div class="form-group">
+                    <label for="rank" class="form-label">Rank/Designation</label>
+                    <input type="text" id="rank" name="rank" class="form-input" placeholder="Your rank or designation">
+                </div>
+
+                <div class="form-group">
+                    <label for="country" class="form-label">Country</label>
+                    <select id="country" name="country" class="form-select" required>
+                        <option value="">Select Country</option>
+                        <option value="india" selected>India</option>
+                        <option value="usa">United States</option>
+                        <option value="uk">United Kingdom</option>
+                        <option value="canada">Canada</option>
+                        <option value="australia">Australia</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
                 <!-- Plan Selection -->
                 <div class="form-group">
                     <label class="form-label">Select Plan</label>
@@ -359,15 +377,38 @@
         function toggleAdvocateFields() {
             const advocateFields = document.getElementById('advocateFields');
             const isAdvocate = document.getElementById('advocate').checked;
+            const planBoxes = document.querySelectorAll('.plan-box');
 
             if (isAdvocate) {
                 advocateFields.classList.add('show');
                 document.getElementById('enrollmentDate').required = true;
                 document.getElementById('barCouncil').required = true;
+
+                // Show only Standard and Premium for advocates
+                planBoxes.forEach(box => {
+                    if (box.dataset.plan === 'basic') {
+                        box.style.display = 'none';
+                    } else {
+                        box.style.display = 'block';
+                    }
+                });
+                // Select standard by default for advocates
+                selectPlan('standard');
             } else {
                 advocateFields.classList.remove('show');
                 document.getElementById('enrollmentDate').required = false;
                 document.getElementById('barCouncil').required = false;
+
+                // Show only Basic for individuals
+                planBoxes.forEach(box => {
+                    if (box.dataset.plan === 'basic') {
+                        box.style.display = 'block';
+                    } else {
+                        box.style.display = 'none';
+                    }
+                });
+                // Select basic by default for individuals
+                selectPlan('basic');
             }
         }
 
@@ -393,6 +434,8 @@
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value,
                 address: document.getElementById('address').value,
+                rank: document.getElementById('rank').value,
+                country: document.getElementById('country').value,
                 userType: document.querySelector('input[name="userType"]:checked').value,
                 plan: selectedPlanValue
             };

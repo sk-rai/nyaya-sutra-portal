@@ -299,10 +299,10 @@
                             <th>Court Name/No</th>
                             <th>Case No</th>
                             <th>Title of Case</th>
-                            <th>Advocate Names</th>
-                            <th>Orders of Case</th>
-                            <th>Penultimate Hearing</th>
-                            <th>Next Date</th>
+                            <th>Advocate Name</th>
+                            <th>Orders/Case</th>
+                            <th>Previous Date of Hearing</th>
+                            <th>Next Date of Hearing</th>
                         </tr>
                     </thead>
                     <tbody id="causeListBody">
@@ -338,6 +338,15 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <div style="margin-top: 1.5rem; display: flex; align-items: center; gap: 1rem;">
+                    <label style="font-weight: 600;">Item No:</label>
+                    <select class="form-input" style="max-width: 200px;">
+                        <option value="present">Present</option>
+                        <option value="not">Not</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Section B: Calendar View -->
