@@ -284,6 +284,14 @@
                     <button type="button" class="court-btn" onclick="selectOrderCourt('supreme')">SC</button>
                 </div>
 
+                <div style="margin-top: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Synopsis Required:</label>
+                    <select class="form-input" style="max-width: 200px;">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+
                 <div class="empty-state">
                     <div class="empty-state-icon">📋</div>
                     <p>No orders or judgements available yet.</p>
@@ -387,14 +395,22 @@
                         caseNo: 'AFT/DEL/2023/1234',
                         caseTitle: 'Rajesh Kumar vs. Union of India',
                         court: 'aft',
-                        addedDate: '15 Feb 2026'
+                        addedDate: '15 Feb 2026',
+                        counselName: 'Adv. S. Patel',
+                        previousHearing: '10 Feb 2026',
+                        nextHearing: '20 Feb 2026',
+                        orders: 'For Hearing'
                     },
                     {
                         id: 2,
                         caseNo: 'CAT/DEL/2024/5678',
                         caseTitle: 'Suresh Patel vs. Ministry of Defence',
                         court: 'cat',
-                        addedDate: '18 Feb 2026'
+                        addedDate: '18 Feb 2026',
+                        counselName: 'Adv. R. Singh',
+                        previousHearing: '15 Feb 2026',
+                        nextHearing: '25 Feb 2026',
+                        orders: 'Disposed'
                     }
                 ];
                 localStorage.setItem('myCases', JSON.stringify(myCases));
@@ -425,6 +441,12 @@
             <span class="case-court-badge court-${caseItem.court}">${caseItem.court.toUpperCase()}</span>
           </div>
           <div class="case-title">${caseItem.caseTitle}</div>
+          <div class="case-meta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1rem; font-size: 0.9rem;">
+            <div><strong>Name:</strong> ${caseItem.counselName || 'N/A'}</div>
+            <div><strong>Previous Hearing:</strong> ${caseItem.previousHearing || 'N/A'}</div>
+            <div><strong>Next Hearing:</strong> ${caseItem.nextHearing || 'N/A'}</div>
+            <div><strong>Orders:</strong> ${caseItem.orders || 'N/A'}</div>
+          </div>
           <div style="font-size: 0.85rem; color: var(--gray-medium); margin-top: 0.5rem;">
             Added on: ${caseItem.addedDate}
           </div>
