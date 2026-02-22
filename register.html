@@ -137,9 +137,21 @@
 
         .plan-selector {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .plan-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .plan-selector {
+                grid-template-columns: 1fr;
+            }
         }
 
         .plan-box {
@@ -315,16 +327,21 @@
                         <div class="plan-box" data-plan="basic" onclick="selectPlan('basic')">
                             <h4>Basic</h4>
                             <div class="price">₹50</div>
-                            <p style="font-size: 0.8rem; color: var(--gray-medium);">per feature</p>
+                            <p style="font-size: 0.8rem; color: var(--gray-medium);">per month</p>
                         </div>
-                        <div class="plan-box selected" data-plan="standard" onclick="selectPlan('standard')">
-                            <h4>Standard</h4>
-                            <div class="price">₹360</div>
+                        <div class="plan-box selected" data-plan="normal" onclick="selectPlan('normal')">
+                            <h4>Normal</h4>
+                            <div class="price">₹199</div>
                             <p style="font-size: 0.8rem; color: var(--gray-medium);">per month</p>
                         </div>
                         <div class="plan-box" data-plan="premium" onclick="selectPlan('premium')">
                             <h4>Premium</h4>
-                            <div class="price">₹1200</div>
+                            <div class="price">₹599</div>
+                            <p style="font-size: 0.8rem; color: var(--gray-medium);">per month</p>
+                        </div>
+                        <div class="plan-box" data-plan="superpremium" onclick="selectPlan('superpremium')">
+                            <h4>Super Premium</h4>
+                            <div class="price">₹679</div>
                             <p style="font-size: 0.8rem; color: var(--gray-medium);">per month</p>
                         </div>
                     </div>
@@ -353,6 +370,17 @@
                             <option value="other">Other</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="trackCourt" class="form-label">Track Court</label>
+                        <select id="trackCourt" name="trackCourt" class="form-select">
+                            <option value="">Select Court</option>
+                            <option value="aft">AFT</option>
+                            <option value="cat">CAT</option>
+                            <option value="highcourt">High Court</option>
+                            <option value="supreme">Supreme Court</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-register">
@@ -372,7 +400,7 @@
 
     <script src="js/auth.js"></script>
     <script>
-        let selectedPlanValue = 'standard';
+        let selectedPlanValue = 'normal';
 
         function toggleAdvocateFields() {
             const advocateFields = document.getElementById('advocateFields');
@@ -384,7 +412,7 @@
                 document.getElementById('enrollmentDate').required = true;
                 document.getElementById('barCouncil').required = true;
 
-                // Show only Standard and Premium for advocates
+                // Show only Normal, Premium, and Super Premium for advocates
                 planBoxes.forEach(box => {
                     if (box.dataset.plan === 'basic') {
                         box.style.display = 'none';
@@ -392,8 +420,8 @@
                         box.style.display = 'block';
                     }
                 });
-                // Select standard by default for advocates
-                selectPlan('standard');
+                // Select normal by default for advocates
+                selectPlan('normal');
             } else {
                 advocateFields.classList.remove('show');
                 document.getElementById('enrollmentDate').required = false;

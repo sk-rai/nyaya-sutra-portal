@@ -223,9 +223,9 @@
                 <p class="welcome-subtitle">Welcome to your personalized case management dashboard</p>
             </div>
 
-            <!-- Section A: My Cases -->
+            <!-- Section A: Add Case -->
             <div class="dashboard-section">
-                <h2 class="section-title">📁 My Cases</h2>
+                <h2 class="section-title">📁 Add Case</h2>
 
                 <form id="addCaseForm" onsubmit="addCase(event)">
                     <div class="case-form">
@@ -248,12 +248,27 @@
                     <button type="submit" class="btn btn-primary">Add Case</button>
                 </form>
 
+                <div style="margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" onclick="scrollToSection('my-case-list')" style="width: 100%;">
+                        📋 View My Case List →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section B: My Case List (Separate Display) -->
+            <div class="dashboard-section" id="my-case-list">
+                <h2 class="section-title">📋 My Case List</h2>
+
+                <p style="color: var(--gray-medium); margin-bottom: 1.5rem;">
+                    All cases added by you are displayed here in a separate section.
+                </p>
+
                 <div class="my-cases-list" id="myCasesList">
                     <!-- Cases will be populated here -->
                 </div>
             </div>
 
-            <!-- Section B: Search My Cases -->
+            <!-- Section C: Search My Cases -->
             <div class="dashboard-section">
                 <h2 class="section-title">🔍 Search My Cases</h2>
 
@@ -284,12 +299,21 @@
                     <button type="button" class="court-btn" onclick="selectOrderCourt('supreme')">SC</button>
                 </div>
 
-                <div style="margin-top: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Synopsis Required:</label>
-                    <select class="form-input" style="max-width: 200px;">
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                    </select>
+                <div
+                    style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Name of
+                            Petitioner/Respondent:</label>
+                        <input type="text" class="form-input" placeholder="Enter name" id="orderPartyName">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Synopsis
+                            Required:</label>
+                        <select class="form-input" id="synopsisRequired">
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="empty-state">
@@ -500,6 +524,13 @@
         function selectOrderCourt(court) {
             // Placeholder for order court selection
             console.log('Selected court for orders:', court);
+        }
+
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     </script>
 </body>

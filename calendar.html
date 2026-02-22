@@ -292,60 +292,18 @@
                     <button class="location-btn" onclick="selectLocation('offbeat')">Offbeat Benches</button>
                 </div>
 
-                <table class="cause-list-table">
-                    <thead>
-                        <tr>
-                            <th>S.No</th>
-                            <th>Court Name/No</th>
-                            <th>Case No</th>
-                            <th>Title of Case</th>
-                            <th>Advocate Name</th>
-                            <th>Orders/Case</th>
-                            <th>Previous Date of Hearing</th>
-                            <th>Next Date of Hearing</th>
-                        </tr>
+                <table class="cause-list-table" id="causeListTable">
+                    <thead id="causeListHeader">
+                        <!-- Table headers will be dynamically generated based on user tier -->
                     </thead>
                     <tbody id="causeListBody">
-                        <tr>
-                            <td>1</td>
-                            <td>AFT Delhi - Court No. 5</td>
-                            <td>AFT/DEL/2023/1234</td>
-                            <td>Rajesh Kumar vs. Union of India</td>
-                            <td>Adv. S. Patel</td>
-                            <td>For Hearing</td>
-                            <td>10 Feb 2026</td>
-                            <td>20 Feb 2026</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>CAT Delhi - Court No. 3</td>
-                            <td>CAT/DEL/2024/5678</td>
-                            <td>Suresh Patel vs. Ministry of Defence</td>
-                            <td>Adv. R. Singh</td>
-                            <td>Disposed</td>
-                            <td>15 Feb 2026</td>
-                            <td>-</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>AFT Delhi - Court No. 7</td>
-                            <td>AFT/DEL/2023/9012</td>
-                            <td>Meena Devi vs. Indian Army</td>
-                            <td>Adv. P. Kumar</td>
-                            <td>For Hearing</td>
-                            <td>12 Feb 2026</td>
-                            <td>22 Feb 2026</td>
-                        </tr>
+                        <!-- Table rows will be dynamically generated -->
                     </tbody>
                 </table>
 
-                <div style="margin-top: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-                    <label style="font-weight: 600;">Item No:</label>
-                    <select class="form-input" style="max-width: 200px;">
-                        <option value="present">Present</option>
-                        <option value="not">Not</option>
-                        <option value="no">No</option>
-                    </select>
+                <!-- Advocate-only controls -->
+                <div id="advocateControls" style="margin-top: 1.5rem; display: none; gap: 1rem; align-items: center;">
+                    <button class="btn btn-primary" onclick="printPreview()">🖨️ Print Preview for Date</button>
                 </div>
             </div>
 
@@ -412,15 +370,55 @@
         let currentMonth = 1; // February (0-indexed)
         let currentYear = 2026;
         const hearingDates = [15, 18, 20, 22, 25]; // Demo hearing dates
+        let userTier = 'unpaid';
+
+        // Demo data
+        const demoData = [
+            {
+                sno: 1,
+                courtName: 'AFT Delhi - Court No. 5',
+                caseNo: 'AFT/DEL/2023/1234',
+                title: 'Rajesh Kumar vs. Union of India',
+                advocate: 'Adv. S. Patel',
+                orders: 'For Hearing',
+                previousDate: '10 Feb 2026',
+                nextDate: '20 Feb 2026',
+                itemFoundNo: 'Item 15'
+            },
+            {
+                sno: 2,
+                courtName: 'CAT Delhi - Court No. 3',
+                caseNo: 'CAT/DEL/2024/5678',
+                title: 'Suresh Patel vs. Ministry of Defence',
+                advocate: 'Adv. R. Singh',
+                orders: 'Disposed',
+                previousDate: '15 Feb 2026',
+                nextDate: '-',
+                itemFoundNo: 'Item 22'
+            },
+            {
+                sno: 3,
+                courtName: 'AFT Delhi - Court No. 7',
+                caseNo: 'AFT/DEL/2023/9012',
+                title: 'Meena Devi vs. Indian Army',
+                advocate: 'Adv. P. Kumar',
+                orders: 'For Hearing',
+                previousDate: '12 Feb 2026',
+                nextDate: '22 Feb 2026',
+                itemFoundNo: 'Item 8'
+            }
+        ];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            const { isLoggedIn, userTier } = checkAuth();
+            const { isLoggedIn, userTier: tier } = checkAuth();
 
             if (!isLoggedIn) {
                 window.location.href = 'login.html';
                 return;
             }
+
+            userTier = tier;
 
             // Update user menu
             const userMenu = document.getElementById('userMenu');
@@ -433,8 +431,59 @@
         <button class="btn btn-logout" onclick="logout()">Logout</button>
       `;
 
+            // Render tier-specific table
+            renderCauseListTable();
             renderCalendar();
         });
+
+        function renderCauseListTable() {
+            const header = document.getElementById('causeListHeader');
+            const body = document.getElementById('causeListBody');
+            const advocateControls = document.getElementById('advocateControls');
+
+            // Check if user is advocate (paid tier)
+            const isAdvocate = userTier !== 'unpaid';
+
+            // Build table header based on tier
+            let headerHTML = '<tr><th>S.No</th><th>Court Name/No</th><th>Case No</th><th>Title of Case</th><th>Advocate Name</th><th>Orders/Case</th><th>Previous Date of Hearing</th><th>Next Date of Hearing</th>';
+
+            if (isAdvocate) {
+                headerHTML += '<th>Item Found No</th>';
+            }
+
+            headerHTML += '</tr>';
+            header.innerHTML = headerHTML;
+
+            // Build table body
+            let bodyHTML = '';
+            demoData.forEach(row => {
+                bodyHTML += `<tr>
+                    <td>${row.sno}</td>
+                    <td>${row.courtName}</td>
+                    <td>${row.caseNo}</td>
+                    <td>${row.title}</td>
+                    <td>${row.advocate}</td>
+                    <td>${row.orders}</td>
+                    <td>${row.previousDate}</td>
+                    <td>${row.nextDate}</td>`;
+
+                if (isAdvocate) {
+                    bodyHTML += `<td>${row.itemFoundNo}</td>`;
+                }
+
+                bodyHTML += '</tr>';
+            });
+            body.innerHTML = bodyHTML;
+
+            // Show advocate-only controls
+            if (isAdvocate) {
+                advocateControls.style.display = 'flex';
+            }
+        }
+
+        function printPreview() {
+            alert('Print Preview functionality:\n\nThis will open a print-friendly view of the cause list for the selected date.\n\n(Feature to be implemented)');
+        }
 
         function switchView(view) {
             const listView = document.getElementById('causeListView');
