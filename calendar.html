@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar & Cause List | Nyaya Sutra</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/tiers.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .calendar-container {
+            padding: 2rem 0;
+            min-height: 100vh;
+            background: var(--gray-light);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .view-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--navy-dark);
+            background: var(--white);
+            color: var(--navy-dark);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn.active {
+            background: var(--navy-dark);
+            color: var(--white);
+        }
+
+        .calendar-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--navy-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gold-primary);
+        }
+
+        .court-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .court-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--navy-dark);
+            background: var(--white);
+            color: var(--navy-dark);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .court-btn:hover,
+        .court-btn.active {
+            background: var(--navy-dark);
+            color: var(--white);
+        }
+
+        .location-filters {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .location-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-medium);
+            background: var(--white);
+            color: var(--gray-dark);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .location-btn:hover,
+        .location-btn.active {
+            background: var(--navy-light);
+            color: var(--white);
+            border-color: var(--navy-light);
+        }
+
+        .cause-list-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .cause-list-table th {
+            background: var(--navy-dark);
+            color: var(--white);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .cause-list-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .cause-list-table tr:hover {
+            background: var(--gray-light);
+        }
+
+        .calendar-widget {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-nav-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: var(--navy-dark);
+            color: var(--white);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .month-year {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--navy-dark);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: var(--gray-medium);
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gray-light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: var(--gray-light);
+        }
+
+        .calendar-day.has-hearing {
+            background: #e3f2fd;
+            border-color: #1976d2;
+            font-weight: 600;
+        }
+
+        .calendar-day.today {
+            background: var(--gold-primary);
+            color: var(--navy-dark);
+            font-weight: 700;
+        }
+
+        .hearing-indicator {
+            position: absolute;
+            bottom: 2px;
+            width: 6px;
+            height: 6px;
+            background: #1976d2;
+            border-radius: 50%;
+        }
+
+        .news-ticker {
+            background: var(--navy-dark);
+            color: var(--white);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .ticker-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .ticker-content {
+            white-space: nowrap;
+            animation: scroll-left 30s linear infinite;
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="18" fill="var(--navy-dark)" stroke="var(--gold-primary)"
+                            stroke-width="2" />
+                        <text x="20" y="25" font-family="Inter" font-size="14" fill="var(--gold-primary)"
+                            text-anchor="middle">⚖️</text>
+                    </svg>
+                    <span class="logo-text">Nyaya Sutra</span>
+                </div>
+                <nav class="nav">
+                    <a href="my-dashboard.html">My Dashboard</a>
+                    <a href="calendar.html">Calendar</a>
+                    <a href="index.html">Search Cases</a>
+                    <div class="user-menu" id="userMenu"></div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="calendar-container">
+        <div class="container">
+
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('list')">📋 Cause List</button>
+                <button class="view-btn" onclick="switchView('calendar')">📅 Calendar View</button>
+            </div>
+
+            <!-- Section A: Cause List (Table View) -->
+            <div class="calendar-section" id="causeListView">
+                <h2 class="section-title">📋 Cause List</h2>
+
+                <div class="court-selector">
+                    <button type="button" class="court-btn active" onclick="selectCourt('aft')">AFT</button>
+                    <button type="button" class="court-btn" onclick="selectCourt('cat')">CAT</button>
+                    <button type="button" class="court-btn" onclick="selectCourt('highcourt')">High Court</button>
+                    <button type="button" class="court-btn" onclick="selectCourt('supreme')">Supreme Court</button>
+                </div>
+
+                <div class="location-filters">
+                    <button class="location-btn active" onclick="selectLocation('delhi')">Delhi</button>
+                    <button class="location-btn" onclick="selectLocation('mumbai')">Mumbai</button>
+                    <button class="location-btn" onclick="selectLocation('jaipur')">Jaipur</button>
+                    <button class="location-btn" onclick="selectLocation('offbeat')">Offbeat Benches</button>
+                </div>
+
+                <table class="cause-list-table" id="causeListTable">
+                    <thead id="causeListHeader">
+                        <!-- Table headers will be dynamically generated based on user tier -->
+                    </thead>
+                    <tbody id="causeListBody">
+                        <!-- Table rows will be dynamically generated -->
+                    </tbody>
+                </table>
+
+                <!-- Advocate-only controls -->
+                <div id="advocateControls" style="margin-top: 1.5rem; display: none; gap: 1rem; align-items: center;">
+                    <button class="btn btn-primary" onclick="printPreview()">🖨️ Print Preview for Date</button>
+                </div>
+            </div>
+
+            <!-- Section B: Calendar View -->
+            <div class="calendar-section" id="calendarView" style="display: none;">
+                <h2 class="section-title">📅 Calendar View</h2>
+
+                <div class="court-selector">
+                    <button type="button" class="court-btn active" onclick="selectCalendarCourt('aft')">AFT</button>
+                    <button type="button" class="court-btn" onclick="selectCalendarCourt('cat')">CAT</button>
+                    <button type="button" class="court-btn" onclick="selectCalendarCourt('highcourt')">High
+                        Court</button>
+                    <button type="button" class="court-btn" onclick="selectCalendarCourt('supreme')">SC</button>
+                </div>
+
+                <div class="location-filters">
+                    <button class="location-btn active" onclick="selectCalendarLocation('delhi')">Delhi</button>
+                    <button class="location-btn" onclick="selectCalendarLocation('mumbai')">Mumbai</button>
+                    <button class="location-btn" onclick="selectCalendarLocation('jaipur')">Jaipur</button>
+                    <button class="location-btn" onclick="selectCalendarLocation('offbeat')">Offbeat Benches</button>
+                </div>
+
+                <div class="calendar-widget">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" onclick="previousMonth()">←</button>
+                        <span class="month-year" id="monthYear">February 2026</span>
+                        <button class="calendar-nav-btn" onclick="nextMonth()">→</button>
+                    </div>
+
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Sun</div>
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
+
+                        <!-- Calendar days will be generated by JavaScript -->
+                        <div id="calendarDays"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section C: News -->
+            <div class="calendar-section">
+                <h2 class="section-title">📰 News</h2>
+
+                <div class="news-ticker">
+                    <div class="ticker-label">Latest Legal News:</div>
+                    <div class="ticker-content">
+                        Supreme Court announces new guidelines for service matters • AFT Delhi to conduct special
+                        hearings on 25th Feb • CAT introduces e-filing system for all benches • High Court extends
+                        deadline for pending cases • New roster for February 2026 published
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        let currentMonth = 1; // February (0-indexed)
+        let currentYear = 2026;
+        const hearingDates = [15, 18, 20, 22, 25]; // Demo hearing dates
+        let userTier = 'unpaid';
+
+        // Demo data
+        const demoData = [
+            {
+                sno: 1,
+                courtName: 'AFT Delhi - Court No. 5',
+                caseNo: 'AFT/DEL/2023/1234',
+                title: 'Rajesh Kumar vs. Union of India',
+                advocate: 'Adv. S. Patel',
+                orders: 'For Hearing',
+                previousDate: '10 Feb 2026',
+                nextDate: '20 Feb 2026',
+                itemFoundNo: 'Item 15'
+            },
+            {
+                sno: 2,
+                courtName: 'CAT Delhi - Court No. 3',
+                caseNo: 'CAT/DEL/2024/5678',
+                title: 'Suresh Patel vs. Ministry of Defence',
+                advocate: 'Adv. R. Singh',
+                orders: 'Disposed',
+                previousDate: '15 Feb 2026',
+                nextDate: '-',
+                itemFoundNo: 'Item 22'
+            },
+            {
+                sno: 3,
+                courtName: 'AFT Delhi - Court No. 7',
+                caseNo: 'AFT/DEL/2023/9012',
+                title: 'Meena Devi vs. Indian Army',
+                advocate: 'Adv. P. Kumar',
+                orders: 'For Hearing',
+                previousDate: '12 Feb 2026',
+                nextDate: '22 Feb 2026',
+                itemFoundNo: 'Item 8'
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const { isLoggedIn, userTier: tier } = checkAuth();
+
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            userTier = tier;
+
+            // Update user menu
+            const userMenu = document.getElementById('userMenu');
+            const tierLabel = userTier === 'unpaid' ? 'Free User' : 'Premium User';
+            userMenu.innerHTML = `
+        <div class="user-info">
+          <span style="color: var(--white); font-size: 0.9rem;">${localStorage.getItem('userEmail')}</span>
+          <span class="user-tier-badge tier-${userTier}">${tierLabel}</span>
+        </div>
+        <button class="btn btn-logout" onclick="logout()">Logout</button>
+      `;
+
+            // Render tier-specific table
+            renderCauseListTable();
+            renderCalendar();
+        });
+
+        function renderCauseListTable() {
+            const header = document.getElementById('causeListHeader');
+            const body = document.getElementById('causeListBody');
+            const advocateControls = document.getElementById('advocateControls');
+
+            // Check if user is advocate (paid tier)
+            const isAdvocate = userTier !== 'unpaid';
+
+            // Build table header based on tier
+            let headerHTML = '<tr><th>S.No</th><th>Court Name/No</th><th>Case No</th><th>Title of Case</th><th>Advocate Name</th><th>Orders/Case</th><th>Previous Date of Hearing</th><th>Next Date of Hearing</th>';
+
+            if (isAdvocate) {
+                headerHTML += '<th>Item Found No</th>';
+            }
+
+            headerHTML += '</tr>';
+            header.innerHTML = headerHTML;
+
+            // Build table body
+            let bodyHTML = '';
+            demoData.forEach(row => {
+                bodyHTML += `<tr>
+                    <td>${row.sno}</td>
+                    <td>${row.courtName}</td>
+                    <td>${row.caseNo}</td>
+                    <td>${row.title}</td>
+                    <td>${row.advocate}</td>
+                    <td>${row.orders}</td>
+                    <td>${row.previousDate}</td>
+                    <td>${row.nextDate}</td>`;
+
+                if (isAdvocate) {
+                    bodyHTML += `<td>${row.itemFoundNo}</td>`;
+                }
+
+                bodyHTML += '</tr>';
+            });
+            body.innerHTML = bodyHTML;
+
+            // Show advocate-only controls
+            if (isAdvocate) {
+                advocateControls.style.display = 'flex';
+            }
+        }
+
+        function printPreview() {
+            alert('Print Preview functionality:\n\nThis will open a print-friendly view of the cause list for the selected date.\n\n(Feature to be implemented)');
+        }
+
+        function switchView(view) {
+            const listView = document.getElementById('causeListView');
+            const calendarView = document.getElementById('calendarView');
+            const buttons = document.querySelectorAll('.view-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            if (view === 'list') {
+                listView.style.display = 'block';
+                calendarView.style.display = 'none';
+                buttons[0].classList.add('active');
+            } else {
+                listView.style.display = 'none';
+                calendarView.style.display = 'block';
+                buttons[1].classList.add('active');
+                renderCalendar();
+            }
+        }
+
+        function selectCourt(court) {
+            console.log('Selected court:', court);
+            // Filter cause list by court
+        }
+
+        function selectLocation(location) {
+            console.log('Selected location:', location);
+            // Filter by location
+        }
+
+        function selectCalendarCourt(court) {
+            console.log('Calendar court:', court);
+        }
+
+        function selectCalendarLocation(location) {
+            console.log('Calendar location:', location);
+        }
+
+        function renderCalendar() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+
+            document.getElementById('monthYear').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date().getDate();
+            const currentMonthCheck = new Date().getMonth();
+            const currentYearCheck = new Date().getFullYear();
+
+            let calendarHTML = '';
+
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                calendarHTML += '<div class="calendar-day" style="visibility: hidden;"></div>';
+            }
+
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = (day === today && currentMonth === currentMonthCheck && currentYear === currentYearCheck);
+                const hasHearing = hearingDates.includes(day);
+
+                let classes = 'calendar-day';
+                if (isToday) classes += ' today';
+                if (hasHearing) classes += ' has-hearing';
+
+                calendarHTML += `
+          <div class="${classes}" onclick="showDayDetails(${day})">
+            ${day}
+            ${hasHearing ? '<div class="hearing-indicator"></div>' : ''}
+          </div>
+        `;
+            }
+
+            document.getElementById('calendarDays').innerHTML = calendarHTML;
+        }
+
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function showDayDetails(day) {
+            if (hearingDates.includes(day)) {
+                alert(`Hearings scheduled on ${day} February 2026:\n\n• AFT/DEL/2023/1234 - Rajesh Kumar vs. Union of India\n• AFT/DEL/2023/9012 - Meena Devi vs. Indian Army`);
+            } else {
+                alert(`No hearings scheduled on ${day} February 2026`);
+            }
+        }
+    </script>
+</body>
+
+</html>

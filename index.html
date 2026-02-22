@@ -110,26 +110,21 @@
   <script src="js/tier-renderer.js"></script>
   <script src="js/print-control.js"></script>
   <script>
-    // Initialize page based on user tier
+    // Check if user is logged in and redirect to dashboard
     document.addEventListener('DOMContentLoaded', () => {
-      const { isLoggedIn, userTier } = checkAuth();
-      const userMenu = document.getElementById('userMenu');
+      const { isLoggedIn } = checkAuth();
 
-      // Update user menu
       if (isLoggedIn) {
-        const tierLabel = userTier === 'unpaid' ? 'Free User' : 'Premium User';
-        userMenu.innerHTML = `
-          <div class="user-info">
-            <span style="color: var(--white); font-size: 0.9rem;">${localStorage.getItem('userEmail')}</span>
-            <span class="user-tier-badge tier-${userTier}">${tierLabel}</span>
-          </div>
-          <button class="btn btn-logout" onclick="logout()">Logout</button>
-        `;
-      } else {
-        userMenu.innerHTML = `
-          <button class="btn btn-outline" onclick="window.location.href='login.html'">Login / Register</button>
-        `;
+        // Redirect logged-in users to their dashboard
+        window.location.href = 'my-dashboard.html';
+        return;
       }
+
+      // For non-logged-in users, show the search page
+      const userMenu = document.getElementById('userMenu');
+      userMenu.innerHTML = `
+        <button class="btn btn-outline" onclick="window.location.href='login.html'">Login / Register</button>
+      `;
 
       // Render case cards
       renderCaseCards();
