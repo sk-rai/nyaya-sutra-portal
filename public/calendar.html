@@ -444,45 +444,52 @@
             // Check if user is advocate (paid tier)
             const isAdvocate = userTier !== 'unpaid';
 
-            // Build table header based on tier
-            let headerHTML = '<tr><th>S.No</th><th>Court Name/No</th><th>Case No</th><th>Title of Case</th><th>Advocate Name</th><th>Orders/Case</th><th>Previous Date of Hearing</th><th>Next Date of Hearing</th>';
-
-            if (isAdvocate) {
-                headerHTML += '<th>Item Found No</th>';
-            }
-
+            // Build table header - exact columns from mockup
+            let headerHTML = '<tr style="background: var(--navy-dark); color: white;">';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">S/NO</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">COURT NAME/NO</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">CASE NO</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">CASE TITLE</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">ADVOCATE NAME</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">NEXT DATE OF HEARING</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">ITEM NO</th>';
+            headerHTML += '<th style="padding: 0.75rem; text-align: left;">ORDERS</th>';
             headerHTML += '</tr>';
             header.innerHTML = headerHTML;
 
             // Build table body
             let bodyHTML = '';
             demoData.forEach(row => {
-                bodyHTML += `<tr>
-                    <td>${row.sno}</td>
-                    <td>${row.courtName}</td>
-                    <td>${row.caseNo}</td>
-                    <td>${row.title}</td>
-                    <td>${row.advocate}</td>
-                    <td>${row.orders}</td>
-                    <td>${row.previousDate}</td>
-                    <td>${row.nextDate}</td>`;
-
-                if (isAdvocate) {
-                    bodyHTML += `<td>${row.itemFoundNo}</td>`;
-                }
-
-                bodyHTML += '</tr>';
+                bodyHTML += `<tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 0.75rem;">${row.sno}</td>
+                    <td style="padding: 0.75rem;">${row.courtName}</td>
+                    <td style="padding: 0.75rem;">${row.caseNo}</td>
+                    <td style="padding: 0.75rem;">${row.title}</td>
+                    <td style="padding: 0.75rem;">${row.advocate}</td>
+                    <td style="padding: 0.75rem;">${row.nextDate}</td>
+                    <td style="padding: 0.75rem;">${row.itemFoundNo}</td>
+                    <td style="padding: 0.75rem;">${row.orders}</td>
+                </tr>`;
             });
             body.innerHTML = bodyHTML;
 
-            // Show advocate-only controls
+            // Show advocate-only controls for print
             if (isAdvocate) {
                 advocateControls.style.display = 'flex';
             }
         }
 
         function printPreview() {
-            alert('Print Preview functionality:\n\nThis will open a print-friendly view of the cause list for the selected date.\n\n(Feature to be implemented)');
+            const userType = localStorage.getItem('userType');
+            const userTier = localStorage.getItem('userTier');
+
+            // Check if user can print (Advocate Premium+ only)
+            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
+                alert('Print Preview functionality:\n\nThis will open a print-friendly view of the cause list for the selected date.');
+                // window.print();
+            } else {
+                alert('Print feature is available for Advocate Premium users only.\n\nUpgrade to Advocate Premium (₹599/month) to unlock printing.');
+            }
         }
 
         function switchView(view) {
