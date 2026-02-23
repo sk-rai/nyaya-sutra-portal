@@ -389,3 +389,120 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 
+========================================
+   NEW FEATURES - FEB 23, 2026
+   ======================================== */
+
+/* ALL (Cands) Button */
+.all-candidates-btn {
+  background: var(--gold) !important;
+  color: var(--navy-dark) !important;
+  font-weight: 600;
+}
+
+.all-candidates-btn:hover {
+  background: #d4af37 !important;
+}
+
+/* Search Results Table */
+.search-results-table {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.search-results-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.search-results-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* Synopsis Section */
+.synopsis-item {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.synopsis-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Print Status Banner */
+.print-status-banner {
+  border-left: 4px solid var(--gold);
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Filter Checkboxes */
+.search-filter-checkboxes input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--navy-dark);
+}
+
+.search-filter-checkboxes label:hover {
+  color: var(--navy-dark);
+}
+
+/* Tier Restriction Notice */
+.tier-restriction-notice {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+  .search-results-table {
+    font-size: 0.85rem;
+  }
+
+  .search-results-table th,
+  .search-results-table td {
+    padding: 0.5rem !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+
+  .header,
+  .nav,
+  .btn,
+  .tier-restriction-notice {
+    display: none !important;
+  }
+
+  .synopsis-item,
+  .search-results-table {
+    page-break-inside: avoid;
+  }
+}

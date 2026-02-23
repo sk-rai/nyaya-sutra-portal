@@ -272,6 +272,27 @@
             <div class="dashboard-section">
                 <h2 class="section-title">🔍 Search My Cases</h2>
 
+                <!-- Filter Checkboxes -->
+                <div class="search-filter-checkboxes"
+                    style="display: flex; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="filter1" style="cursor: pointer;">
+                        <span>Active Cases</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="filter2" style="cursor: pointer;">
+                        <span>Pending Hearing</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="filter3" style="cursor: pointer;">
+                        <span>Disposed</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="filter4" style="cursor: pointer;">
+                        <span>Archived</span>
+                    </label>
+                </div>
+
                 <div class="search-filters">
                     <input type="text" class="form-input" placeholder="Case Number" id="searchCaseNo">
                     <input type="text" class="form-input" placeholder="Case Name" id="searchCaseName">
@@ -280,17 +301,50 @@
                 </div>
 
                 <div class="court-selector">
-                    <button type="button" class="court-btn" onclick="filterByCourt('all')">All Courts</button>
+                    <button type="button" class="court-btn all-candidates-btn" onclick="filterByCourt('all')">ALL
+                        (Cands)</button>
                     <button type="button" class="court-btn" onclick="filterByCourt('aft')">AFT</button>
                     <button type="button" class="court-btn" onclick="filterByCourt('cat')">CAT</button>
-                    <button type="button" class="court-btn" onclick="filterByCourt('highcourt')">High Court</button>
-                    <button type="button" class="court-btn" onclick="filterByCourt('supreme')">Supreme Court</button>
+                    <button type="button" class="court-btn" onclick="filterByCourt('highcourt')">HC</button>
+                    <button type="button" class="court-btn" onclick="filterByCourt('supreme')">SC</button>
+                </div>
+
+                <!-- Search Results Table -->
+                <div style="margin-top: 1.5rem; overflow-x: auto;">
+                    <table class="search-results-table" style="width: 100%; border-collapse: collapse; display: none;"
+                        id="searchResultsTable">
+                        <thead>
+                            <tr style="background: var(--navy-dark); color: white;">
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">SYNC</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">CASE NO</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">TITLE/CASE</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">COURT NAME/NO
+                                </th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">NEXT DATE OF
+                                    HEARING</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">PREV DATE OF
+                                    HEARING</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">ORDERS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
             <!-- Section C: Orders/Judgements/Decree -->
             <div class="dashboard-section">
                 <h2 class="section-title">📄 Orders / Judgements / Decree</h2>
+
+                <!-- Print Status Indicator -->
+                <div class="print-status-banner"
+                    style="background: #f8f9fa; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.2rem;">🖨️</span>
+                    <span id="ordersPrintStatus" style="font-size: 0.9rem; color: var(--gray-dark);">
+                        <!-- Will be updated by JavaScript -->
+                    </span>
+                </div>
 
                 <div class="court-selector">
                     <button type="button" class="court-btn active" onclick="selectOrderCourt('aft')">AFT</button>
@@ -302,18 +356,25 @@
                 <div
                     style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                     <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Case No:</label>
+                        <input type="text" class="form-input" placeholder="Enter case number" id="orderCaseNo">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Title of Case:</label>
+                        <input type="text" class="form-input" placeholder="Enter case title" id="orderCaseTitle">
+                    </div>
+                    <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Name of
                             Petitioner/Respondent:</label>
                         <input type="text" class="form-input" placeholder="Enter name" id="orderPartyName">
                     </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Synopsis
-                            Required:</label>
-                        <select class="form-input" id="synopsisRequired">
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                        </select>
-                    </div>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="searchOrders()">Search Orders</button>
+                    <button class="btn btn-secondary" onclick="printOrders()" style="margin-left: 0.5rem;">
+                        🖨️ Print
+                    </button>
                 </div>
 
                 <div class="empty-state">
@@ -324,6 +385,97 @@
                 </div>
             </div>
 
+            <!-- Section D: Synopsis (Advocate Premium+ Only) -->
+            <div class="dashboard-section" id="synopsisSection" style="display: none;">
+                <h2 class="section-title">📚 Synopsis</h2>
+
+                <!-- Access Notice -->
+                <div class="tier-restriction-notice"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.5rem;">⭐</span>
+                        <div>
+                            <strong style="display: block; margin-bottom: 0.25rem;">Premium Feature</strong>
+                            <span style="font-size: 0.9rem; opacity: 0.95;">Available for Advocate Premium (₹599+) users
+                                only</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print Status -->
+                <div class="print-status-banner"
+                    style="background: #f8f9fa; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.2rem;">🖨️</span>
+                    <span style="font-size: 0.9rem; color: var(--gray-dark);">
+                        <strong>Print Enabled</strong> - You can print synopsis documents
+                    </span>
+                </div>
+
+                <div class="court-selector">
+                    <button type="button" class="court-btn active" onclick="selectSynopsisCourt('aft')">AFT</button>
+                    <button type="button" class="court-btn" onclick="selectSynopsisCourt('cat')">CAT</button>
+                    <button type="button" class="court-btn" onclick="selectSynopsisCourt('highcourt')">HC</button>
+                    <button type="button" class="court-btn" onclick="selectSynopsisCourt('supreme')">SC</button>
+                </div>
+
+                <div class="synopsis-list" id="synopsisList" style="margin-top: 1.5rem;">
+                    <!-- Sample Synopsis Items -->
+                    <div class="synopsis-item"
+                        style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--gold); margin-bottom: 1rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; color: var(--navy-dark);">AFT/DEL/2023/1234</span>
+                            <span style="color: var(--gray-medium); font-size: 0.9rem;">15 Feb 2026</span>
+                        </div>
+                        <h4 style="color: var(--navy-dark); margin-bottom: 0.75rem;">Rajesh Kumar vs. Union of India
+                        </h4>
+                        <p style="color: var(--gray-dark); line-height: 1.6; margin-bottom: 1rem;">
+                            The tribunal held that the petitioner's claim for pension benefits was valid and directed
+                            the respondent to release the arrears within 60 days. The court emphasized the importance
+                            of timely pension disbursement for retired personnel.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-secondary" onclick="viewFullJudgement('AFT/DEL/2023/1234')">
+                                View Full Judgement
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printSynopsis('AFT/DEL/2023/1234')">
+                                🖨️ Print
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="synopsis-item"
+                        style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--gold); margin-bottom: 1rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 600; color: var(--navy-dark);">AFT/DEL/2023/5678</span>
+                            <span style="color: var(--gray-medium); font-size: 0.9rem;">10 Feb 2026</span>
+                        </div>
+                        <h4 style="color: var(--navy-dark); margin-bottom: 0.75rem;">Meena Devi vs. Indian Army</h4>
+                        <p style="color: var(--gray-dark); line-height: 1.6; margin-bottom: 1rem;">
+                            The court ruled in favor of the petitioner regarding service benefits and ordered
+                            reinstatement with back wages. The judgment highlighted procedural irregularities in
+                            the dismissal process.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-secondary" onclick="viewFullJudgement('AFT/DEL/2023/5678')">
+                                View Full Judgement
+                            </button>
+                            <button class="btn btn-sm btn-outline" onclick="printSynopsis('AFT/DEL/2023/5678')">
+                                🖨️ Print
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action: Add New Case List -->
+            <div class="dashboard-section" style="text-align: center; padding: 2rem;">
+                <button class="btn btn-primary btn-large" onclick="scrollToSection('addCaseForm')"
+                    style="font-size: 1.1rem; padding: 1rem 2rem;">
+                    ➕ ADD NEW CASE LIST
+                </button>
+            </div>
             <!-- Section D: Synopsis -->
             <div class="dashboard-section">
                 <h2 class="section-title">📝 ANJ (Judgement/Decree) Synopsis</h2>
@@ -509,6 +661,30 @@
                 );
             });
 
+            // Show results table
+            const resultsTable = document.getElementById('searchResultsTable');
+            const resultsBody = document.getElementById('searchResultsBody');
+
+            if (filtered.length > 0) {
+                resultsTable.style.display = 'table';
+                resultsBody.innerHTML = filtered.map((c, index) => `
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">
+                            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #28a745; margin-right: 0.5rem;"></span>
+                            Synced
+                        </td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.caseNo}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.caseTitle}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.court.toUpperCase()}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.nextHearing || 'N/A'}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.previousHearing || 'N/A'}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.orders || 'Pending'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                resultsTable.style.display = 'none';
+            }
+
             renderMyCases(filtered);
         }
 
@@ -522,9 +698,88 @@
         }
 
         function selectOrderCourt(court) {
-            // Placeholder for order court selection
+            document.querySelectorAll('.court-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
             console.log('Selected court for orders:', court);
         }
+
+        function selectSynopsisCourt(court) {
+            document.querySelectorAll('.court-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            console.log('Selected court for synopsis:', court);
+        }
+
+        function searchOrders() {
+            const caseNo = document.getElementById('orderCaseNo').value;
+            const caseTitle = document.getElementById('orderCaseTitle').value;
+            const partyName = document.getElementById('orderPartyName').value;
+
+            if (!caseNo && !caseTitle && !partyName) {
+                alert('Please enter at least one search criteria');
+                return;
+            }
+
+            alert('Searching orders...\n\nThis feature will be connected to the backend API.');
+        }
+
+        function printOrders() {
+            const userTier = localStorage.getItem('userTier');
+            const userType = localStorage.getItem('userType');
+
+            // Check if user can print (Premium+ only)
+            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
+                alert('Printing orders...\n\nThis will open the print dialog.');
+                // window.print();
+            } else {
+                alert('Print feature is available for Advocate Premium users only.\n\nUpgrade to Advocate Premium (₹599/month) to unlock printing.');
+            }
+        }
+
+        function printSynopsis(caseNo) {
+            const userTier = localStorage.getItem('userTier');
+
+            if (userTier === 'premium' || userTier === 'superpremium') {
+                alert(`Printing synopsis for case: ${caseNo}\n\nThis will open the print dialog.`);
+                // window.print();
+            } else {
+                alert('Print feature is available for Premium users only.');
+            }
+        }
+
+        function viewFullJudgement(caseNo) {
+            alert(`Opening full judgement for case: ${caseNo}\n\nThis will open the complete judgement document.`);
+        }
+
+        function updatePrintStatus() {
+            const userTier = localStorage.getItem('userTier');
+            const userType = localStorage.getItem('userType');
+            const ordersPrintStatus = document.getElementById('ordersPrintStatus');
+
+            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
+                ordersPrintStatus.innerHTML = '<strong style="color: #28a745;">Print Enabled</strong> - You can print orders and documents';
+            } else {
+                ordersPrintStatus.innerHTML = '<strong style="color: #dc3545;">Print Disabled</strong> - Upgrade to Advocate Premium (₹599+) to enable printing';
+            }
+        }
+
+        function initializeSynopsis() {
+            const userTier = localStorage.getItem('userTier');
+            const userType = localStorage.getItem('userType');
+            const synopsisSection = document.getElementById('synopsisSection');
+
+            // Show ONLY for Advocate Premium (₹599+)
+            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
+                synopsisSection.style.display = 'block';
+            } else {
+                synopsisSection.style.display = 'none';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePrintStatus();
+            initializeSynopsis();
+        });
 
         function scrollToSection(sectionId) {
             const section = document.getElementById(sectionId);
