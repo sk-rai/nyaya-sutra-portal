@@ -1,0 +1,207 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    NYAYA SUTRA - NEW MOCKUP CHANGES                          ║
+║                         February 22, 2026                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔴 CRITICAL CHANGE: PRICING UPDATE                                           │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  BEFORE:                          AFTER:                                     │
+│  ┌─────────────────┐             ┌─────────────────┐                        │
+│  │ Individual Plan │             │ Individual Plan │                        │
+│  │    ₹50/month    │    ───►     │    ₹59/month    │                        │
+│  └─────────────────┘             └─────────────────┘                        │
+│                                                                              │
+│  Impact: 18% price increase                                                 │
+│  Files: dashboard.html, register.html                                       │
+│  Time: 30 minutes                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ➕ NEW FEATURE: SYNOPSIS SECTION                                             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  📚 Synopsis of Judgements                                                   │
+│  ⭐ Available for Premium & Advocate users only                              │
+│                                                                              │
+│  [AFT] [CAT] [High Court] [SC]                                              │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────┐         │
+│  │ AFT/DEL/2023/1234                           15 Feb 2026        │         │
+│  │ Rajesh Kumar vs. Union of India                                │         │
+│  │                                                                 │         │
+│  │ The tribunal held that the petitioner's claim for pension      │         │
+│  │ benefits was valid and directed the respondent to release...   │         │
+│  │                                                                 │         │
+│  │ [View Full Judgement]                                          │         │
+│  └────────────────────────────────────────────────────────────────┘         │
+│                                                                              │
+│  Time: 2-3 hours                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔧 ENHANCED: ORDERS/JUDGEMENTS SECTION                                       │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  BEFORE:                                                                     │
+│  ┌──────────────────────────────────────────┐                               │
+│  │ Case No: [_____________]                 │                               │
+│  │ Title:   [_____________]                 │                               │
+│  │ [Search]                                 │                               │
+│  └──────────────────────────────────────────┘                               │
+│                                                                              │
+│  AFTER:                                                                      │
+│  ┌──────────────────────────────────────────┐                               │
+│  │ Case No: [_____________]                 │                               │
+│  │ Title:   [_____________]                 │                               │
+│  │ Petitioner/Respondent: [_____________]   │ ← NEW FIELD                   │
+│  │ [Search] ──► Opens Popup Modal           │ ← NEW BEHAVIOR                │
+│  └──────────────────────────────────────────┘                               │
+│                                                                              │
+│  Popup Modal:                                                                │
+│  ┌────────────────────────────────────────────────────────┐                 │
+│  │ Orders / Judgement                              [X]    │                 │
+│  ├────────────────────────────────────────────────────────┤                 │
+│  │ AFT/DEL/2023/1234                                      │                 │
+│  │ Rajesh Kumar vs. Union of India                        │                 │
+│  │                                                        │                 │
+│  │ [Order content displayed here...]                     │                 │
+│  │                                                        │                 │
+│  ├────────────────────────────────────────────────────────┤                 │
+│  │                    [Close] [Download PDF]              │                 │
+│  └────────────────────────────────────────────────────────┘                 │
+│                                                                              │
+│  Time: 2 hours                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 👔 NEW: ADVOCATE-SPECIFIC CAUSE LIST VIEW                                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  FOR INDIVIDUALS (Standard View):                                           │
+│  ┌────┬──────────┬───────────┬──────────┬──────────┬──────────┐            │
+│  │S.No│ Case No  │   Title   │ Adv Name │ Prev Date│ Next Date│            │
+│  ├────┼──────────┼───────────┼──────────┼──────────┼──────────┤            │
+│  │ 1  │ AFT/1234 │ Kumar vs  │ Adv Patel│ 10 Feb   │ 20 Feb   │            │
+│  └────┴──────────┴───────────┴──────────┴──────────┴──────────┘            │
+│                                                                              │
+│  FOR ADVOCATES (Enhanced View):                                             │
+│  ┌────┬──────────┬───────────┬──────────┬──────────┬────────┬──────────────┬──────────┬──────────┐
+│  │S.No│ Case No  │   Title   │ Adv Name │Only for  │ Status │   Actions    │ Prev Date│ Next Date│
+│  │    │          │           │          │   Adv    │        │              │          │          │
+│  ├────┼──────────┼───────────┼──────────┼──────────┼────────┼──────────────┼──────────┼──────────┤
+│  │ 1  │ AFT/1234 │ Kumar vs  │ Adv Patel│ Special  │ Active │[Planned]     │ 10 Feb   │ 20 Feb   │
+│  │    │          │           │          │   Note   │        │[RCAST]       │          │          │
+│  └────┴──────────┴───────────┴──────────┴──────────┴────────┴──────────────┴──────────┴──────────┘
+│                    ↑ ADVOCATE-ONLY COLUMNS (Hidden for individuals) ↑                  │
+│                                                                              │
+│  Time: 2-3 hours                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔐 ACCESS CONTROL MATRIX                                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Feature                    │ Free │ Individual │ Advocate │                │
+│                             │      │   (₹59)    │ (₹199+)  │                │
+│  ───────────────────────────┼──────┼────────────┼──────────┤                │
+│  Basic case search          │  ✅  │     ✅     │    ✅    │                │
+│  Add cases                  │  ❌  │     ✅     │    ✅    │                │
+│  Orders/Judgements          │  ❌  │     ✅     │    ✅    │                │
+│  Synopsis                   │  ❌  │     ✅     │    ✅    │ ← NEW          │
+│  Advocate columns           │  ❌  │     ❌     │    ✅    │ ← NEW          │
+│  Planned/RCAST buttons      │  ❌  │     ❌     │    ✅    │ ← NEW          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⏱️  IMPLEMENTATION TIMELINE                                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  DAY 1 MORNING (2-3 hours)                                                  │
+│  ├─ Update pricing ₹50 → ₹59                                                │
+│  ├─ Add Petitioner/Respondent field                                         │
+│  └─ Test and commit                                                         │
+│                                                                              │
+│  DAY 1 AFTERNOON (3-4 hours)                                                │
+│  ├─ Create Orders popup modal                                               │
+│  ├─ Add modal styling                                                       │
+│  ├─ Implement modal JavaScript                                              │
+│  └─ Test modal functionality                                                │
+│                                                                              │
+│  DAY 2 MORNING (3-4 hours)                                                  │
+│  ├─ Build Synopsis section                                                  │
+│  ├─ Add tier-based access control                                           │
+│  ├─ Implement court selector                                                │
+│  └─ Test tier restrictions                                                  │
+│                                                                              │
+│  DAY 2 AFTERNOON (2-3 hours)                                                │
+│  ├─ Add advocate-only columns                                               │
+│  ├─ Implement Planned/RCAST buttons                                         │
+│  ├─ Add user type detection                                                 │
+│  └─ Final testing and QA                                                    │
+│                                                                              │
+│  TOTAL: 10-14 hours (1.5-2 days)                                            │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📊 PRIORITY LEVELS                                                           │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  🔴 CRITICAL (Must do immediately)                                           │
+│     • Update pricing ₹50 → ₹59                                              │
+│     • Add Petitioner/Respondent field                                       │
+│                                                                              │
+│  🟡 HIGH (Should do this week)                                               │
+│     • Create Orders popup modal                                             │
+│     • Build Synopsis section                                                │
+│     • Implement tier-based access                                           │
+│                                                                              │
+│  🟢 MEDIUM (Can do next week)                                                │
+│     • Add advocate-specific columns                                         │
+│     • Implement Planned/RCAST buttons                                       │
+│     • Add user type detection                                               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ❓ QUESTIONS FOR CLIENT                                                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  1. What does "RCAST" stand for? What should it do?                         │
+│  2. What should "Planned" button do? Mark case? Change status?              │
+│  3. Should free users see blurred synopsis or nothing at all?               │
+│  4. Is ₹59 the final price? Any promotional pricing?                        │
+│  5. Where does synopsis data come from? Manual or automated?                │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📁 FILES TO MODIFY                                                           │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  File                        │ Changes                    │ Time            │
+│  ────────────────────────────┼────────────────────────────┼─────────────    │
+│  public/dashboard.html       │ Update pricing ₹50→₹59     │ 15 min          │
+│  public/register.html        │ Update pricing ₹50→₹59     │ 15 min          │
+│  public/my-dashboard.html    │ Add fields, popup, synopsis│ 5-6 hrs         │
+│  public/calendar.html        │ Advocate-specific view     │ 2-3 hrs         │
+│  public/css/components.css   │ Modal, synopsis styles     │ 1 hr            │
+│  public/js/auth.js           │ User type detection        │ 30 min          │
+│                                                                              │
+│  TOTAL: 9-11 hours                                                          │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                           READY FOR IMPLEMENTATION                           ║
+║                                                                              ║
+║  ✅ Analysis Complete                                                        ║
+║  ✅ Specifications Ready                                                     ║
+║  ✅ Code Examples Provided                                                   ║
+║  ⏳ Awaiting Client Approval                                                 ║
+║                                                                              ║
+║  Next Step: Get client confirmation and start with pricing update           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
