@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Filing Status | Nyaya Sutra</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tiers.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .efiling-container {
+            padding: 2rem 0;
+            min-height: 100vh;
+            background: var(--gray-light);
+        }
+
+        .page-header {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--gray-medium);
+            font-size: 1.1rem;
+        }
+
+        .search-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .court-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .court-tab {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--navy-dark);
+            background: var(--white);
+            color: var(--navy-dark);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .court-tab:hover, .court-tab.active {
+            background: var(--navy-dark);
+            color: var(--gold-primary);
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--navy-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-primary);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--navy-dark);
+        }
+
+        .status-filters {
+            display: flex;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .status-filter {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--gray-medium);
+            background: var(--white);
+            color: var(--gray-dark);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-filter:hover, .status-filter.active {
+            border-color: var(--navy-dark);
+            background: var(--navy-dark);
+            color: var(--gold-primary);
+        }
+
+        .filing-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--navy-dark);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .filing-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .filing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .filing-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+        }
+
+        .filing-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: var(--warning);
+            color: var(--navy-dark);
+        }
+
+        .status-submitted {
+            background: #17a2b8;
+            color: var(--white);
+        }
+
+        .status-accepted {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .status-rejected {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .filing-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--navy-dark);
+            font-weight: 600;
+        }
+
+        .filing-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn-primary {
+            background: var(--navy-dark);
+            color: var(--gold-primary);
+        }
+
+        .action-btn-secondary {
+            background: var(--gray-light);
+            color: var(--navy-dark);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-text {
+            color: var(--gray-medium);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="efiling-container">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">e-Filing Status Tracker</h1>
+                <p class="page-subtitle">Track your court filings across all tribunals and courts</p>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Total Filings</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">7</div>
+                    <div class="stat-label">Accepted</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2 style="color: var(--navy-dark); margin-bottom: 1rem;">Search Filings</h2>
+                
+                <!-- Court Tabs -->
+                <div class="court-tabs">
+                    <button class="court-tab active" data-court="all">All Courts</button>
+                    <button class="court-tab" data-court="sc">Supreme Court</button>
+                    <button class="court-tab" data-court="hc">High Court</button>
+                    <button class="court-tab" data-court="aft">AFT</button>
+                    <button class="court-tab" data-court="cat">CAT</button>
+                </div>
+
+                <!-- Search Form -->
+                <form class="search-form" onsubmit="event.preventDefault(); searchFilings();">
+                    <div class="form-group">
+                        <label class="form-label">Case Number</label>
+                        <input type="text" class="form-input" id="caseNumber" placeholder="Enter case number">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Acknowledgment Number</label>
+                        <input type="text" class="form-input" id="ackNumber" placeholder="Enter acknowledgment number">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+
+                <!-- Status Filters -->
+                <div class="status-filters">
+                    <button class="status-filter active" data-status="all">All Status</button>
+                    <button class="status-filter" data-status="pending">Pending</button>
+                    <button class="status-filter" data-status="submitted">Submitted</button>
+                    <button class="status-filter" data-status="accepted">Accepted</button>
+                    <button class="status-filter" data-status="rejected">Rejected</button>
+                </div>
+            </div>
+
+            <!-- Filings List -->
+            <div id="filingsList">
+                <!-- Filing cards will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Mock filing data
+        const filings = [
+            {
+                id: 1,
+                caseNumber: "AFT/DEL/2026/1234",
+                court: "AFT Delhi",
+                filingType: "Original Application",
+                status: "accepted",
+                submissionDate: "2026-02-15",
+                ackNumber: "ACK/2026/5678",
+                documents: 5,
+                paymentStatus: "Paid"
+            },
+            {
+                id: 2,
+                caseNumber: "CAT/DEL/2026/5678",
+                court: "CAT Delhi",
+                filingType: "Appeal",
+                status: "pending",
+                submissionDate: "2026-02-20",
+                ackNumber: "ACK/2026/9012",
+                documents: 3,
+                paymentStatus: "Pending"
+            },
+            {
+                id: 3,
+                caseNumber: "HC/DEL/2026/3456",
+                court: "Delhi High Court",
+                filingType: "Writ Petition",
+                status: "submitted",
+                submissionDate: "2026-02-25",
+                ackNumber: "ACK/2026/3456",
+                documents: 8,
+                paymentStatus: "Paid"
+            },
+            {
+                id: 4,
+                caseNumber: "AFT/MUM/2026/7890",
+                court: "AFT Mumbai",
+                filingType: "Miscellaneous Application",
+                status: "rejected",
+                submissionDate: "2026-02-10",
+                ackNumber: "ACK/2026/7890",
+                documents: 2,
+                paymentStatus: "Refunded"
+            }
+        ];
+
+        function renderFilings(filteredFilings) {
+            const filingsList = document.getElementById('filingsList');
+            
+            if (filteredFilings.length === 0) {
+                filingsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📄</div>
+                        <div class="empty-text">No filings found</div>
+                        <button class="btn btn-primary" onclick="window.location.href='my-dashboard.html'">
+                            Go to Dashboard
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            filingsList.innerHTML = filteredFilings.map(filing => `
+                <div class="filing-card">
+                    <div class="filing-header">
+                        <div class="filing-number">${filing.caseNumber}</div>
+                        <span class="filing-status status-${filing.status}">
+                            ${filing.status.charAt(0).toUpperCase() + filing.status.slice(1)}
+                        </span>
+                    </div>
+                    <div class="filing-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Court</span>
+                            <span class="detail-value">${filing.court}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Filing Type</span>
+                            <span class="detail-value">${filing.filingType}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Submission Date</span>
+                            <span class="detail-value">${new Date(filing.submissionDate).toLocaleDateString('en-IN')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Acknowledgment No</span>
+                            <span class="detail-value">${filing.ackNumber}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Documents</span>
+                            <span class="detail-value">${filing.documents} files</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Payment Status</span>
+                            <span class="detail-value">${filing.paymentStatus}</span>
+                        </div>
+                    </div>
+                    <div class="filing-actions">
+                        <button class="action-btn action-btn-primary" onclick="viewDetails(${filing.id})">
+                            View Details
+                        </button>
+                        <button class="action-btn action-btn-secondary" onclick="downloadAck(${filing.id})">
+                            Download Acknowledgment
+                        </button>
+                        <button class="action-btn action-btn-secondary" onclick="trackStatus(${filing.id})">
+                            Track Status
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initial render
+        renderFilings(filings);
+
+        // Event listeners
+        document.querySelectorAll('.court-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.court-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const court = this.dataset.court;
+                const filtered = court === 'all' ? filings : 
+                    filings.filter(f => f.court.toLowerCase().includes(court));
+                renderFilings(filtered);
+            });
+        });
+
+        document.querySelectorAll('.status-filter').forEach(filter => {
+            filter.addEventListener('click', function() {
+                document.querySelectorAll('.status-filter').forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                
+                const status = this.dataset.status;
+                const filtered = status === 'all' ? filings : 
+                    filings.filter(f => f.status === status);
+                renderFilings(filtered);
+            });
+        });
+
+        function searchFilings() {
+            const caseNumber = document.getElementById('caseNumber').value.toLowerCase();
+            const ackNumber = document.getElementById('ackNumber').value.toLowerCase();
+            
+            const filtered = filings.filter(f => 
+                f.caseNumber.toLowerCase().includes(caseNumber) &&
+                f.ackNumber.toLowerCase().includes(ackNumber)
+            );
+            
+            renderFilings(filtered);
+        }
+
+        function viewDetails(id) {
+            alert(`Viewing details for filing ID: ${id}`);
+        }
+
+        function downloadAck(id) {
+            alert(`Downloading acknowledgment for filing ID: ${id}`);
+        }
+
+        function trackStatus(id) {
+            alert(`Tracking status for filing ID: ${id}`);
+        }
+    </script>
+</body>
+</html>
