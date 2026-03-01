@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Court Collection | Nyaya Sutra</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .court-collection-container {
+            padding: 2rem 0;
+            min-height: 100vh;
+            background: var(--gray-light);
+        }
+
+        .court-hierarchy {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .court-category {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .court-category:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .court-category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .court-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gold-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .court-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .court-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .court-item:hover {
+            background: var(--navy-dark);
+            color: var(--gold);
+        }
+
+        .state-selector {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .state-dropdown {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        .district-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .district-item {
+            padding: 1rem;
+            background: var(--gray-light);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .district-item:hover {
+            background: var(--navy-dark);
+            color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="court-collection-container">
+        <div class="container">
+            <h1 style="color: var(--navy-dark); margin-bottom: 2rem;">Court Collection</h1>
+
+            <!-- State/UT Selector -->
+            <div class="state-selector">
+                <h2 style="color: var(--navy-dark);">Select State/UT</h2>
+                <select class="state-dropdown" id="stateSelector">
+                    <option value="">-- Select State/UT --</option>
+                    <option value="delhi">Delhi</option>
+                    <option value="maharashtra">Maharashtra</option>
+                    <option value="karnataka">Karnataka</option>
+                    <option value="tamil-nadu">Tamil Nadu</option>
+                    <option value="west-bengal">West Bengal</option>
+                    <option value="rajasthan">Rajasthan</option>
+                    <!-- Add more states -->
+                </select>
+                <div id="districtList" class="district-list" style="display: none;">
+                    <!-- Districts will be populated here -->
+                </div>
+            </div>
+
+            <!-- Court Hierarchy -->
+            <div class="court-hierarchy">
+                <!-- Supreme Court -->
+                <div class="court-category">
+                    <div class="court-category-title">
+                        <div class="court-icon">⚖️</div>
+                        Supreme Court
+                    </div>
+                    <ul class="court-list">
+                        <li class="court-item" onclick="viewCourt('sc')">Supreme Court of India</li>
+                        <li class="court-item" onclick="viewCourt('sc-registry')">SC Registry</li>
+                        <li class="court-item" onclick="viewCourt('sc-efiling')">SC e-Filing</li>
+                    </ul>
+                </div>
+
+                <!-- High Courts -->
+                <div class="court-category">
+                    <div class="court-category-title">
+                        <div class="court-icon">🏛️</div>
+                        High Courts
+                    </div>
+                    <ul class="court-list">
+                        <li class="court-item" onclick="viewCourt('delhi-hc')">Delhi High Court</li>
+                        <li class="court-item" onclick="viewCourt('bombay-hc')">Bombay High Court</li>
+                        <li class="court-item" onclick="viewCourt('calcutta-hc')">Calcutta High Court</li>
+                        <li class="court-item" onclick="viewCourt('madras-hc')">Madras High Court</li>
+                        <li class="court-item" onclick="viewCourt('karnataka-hc')">Karnataka High Court</li>
+                    </ul>
+                </div>
+
+                <!-- AFT -->
+                <div class="court-category">
+                    <div class="court-category-title">
+                        <div class="court-icon">🎖️</div>
+                        Armed Forces Tribunal
+                    </div>
+                    <ul class="court-list">
+                        <li class="court-item" onclick="viewCourt('aft-delhi')">AFT Delhi (Principal Bench)</li>
+                        <li class="court-item" onclick="viewCourt('aft-mumbai')">AFT Mumbai</li>
+                        <li class="court-item" onclick="viewCourt('aft-chennai')">AFT Chennai</li>
+                        <li class="court-item" onclick="viewCourt('aft-kolkata')">AFT Kolkata</li>
+                        <li class="court-item" onclick="viewCourt('aft-chandigarh')">AFT Chandigarh</li>
+                    </ul>
+                </div>
+
+                <!-- CAT -->
+                <div class="court-category">
+                    <div class="court-category-title">
+                        <div class="court-icon">🏢</div>
+                        Central Administrative Tribunal
+                    </div>
+                    <ul class="court-list">
+                        <li class="court-item" onclick="viewCourt('cat-delhi')">CAT Delhi (Principal Bench)</li>
+                        <li class="court-item" onclick="viewCourt('cat-mumbai')">CAT Mumbai</li>
+                        <li class="court-item" onclick="viewCourt('cat-chennai')">CAT Chennai</li>
+                        <li class="court-item" onclick="viewCourt('cat-kolkata')">CAT Kolkata</li>
+                        <li class="court-item" onclick="viewCourt('cat-bangalore')">CAT Bangalore</li>
+                    </ul>
+                </div>
+
+                <!-- Appellate Tribunals -->
+                <div class="court-category">
+                    <div class="court-category-title">
+                        <div class="court-icon">📋</div>
+                        Appellate Tribunals
+                    </div>
+                    <ul class="court-list">
+                        <li class="court-item" onclick="viewCourt('nclat')">NCLAT</li>
+                        <li class="court-item" onclick="viewCourt('itat')">ITAT</li>
+                        <li class="court-item" onclick="viewCourt('cestat')">CESTAT</li>
+                        <li class="court-item" onclick="viewCourt('tdsat')">TDSAT</li>
+                    </ul>
+                </div>
+
+                <!-- District Courts -->
+                <div class="court-category">
+                    <div class="court-category-title">
+                        <div class="court-icon">🏛️</div>
+                        District Courts
+                    </div>
+                    <ul class="court-list">
+                        <li class="court-item" onclick="showStateSelector()">Browse by State/UT</li>
+                        <li class="court-item" onclick="viewCourt('district-search')">Search District Courts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const districtsByState = {
+            'delhi': ['Central Delhi', 'East Delhi', 'New Delhi', 'North Delhi', 'South Delhi', 'West Delhi'],
+            'maharashtra': ['Mumbai City', 'Mumbai Suburban', 'Pune', 'Nagpur', 'Thane', 'Nashik'],
+            'karnataka': ['Bangalore Urban', 'Bangalore Rural', 'Mysore', 'Mangalore', 'Hubli'],
+            'tamil-nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem'],
+            'west-bengal': ['Kolkata', 'Howrah', 'North 24 Parganas', 'South 24 Parganas', 'Hooghly'],
+            'rajasthan': ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur']
+        };
+
+        document.getElementById('stateSelector').addEventListener('change', function(e) {
+            const state = e.target.value;
+            const districtList = document.getElementById('districtList');
+            
+            if (state && districtsByState[state]) {
+                districtList.style.display = 'grid';
+                districtList.innerHTML = districtsByState[state].map(district => 
+                    `<div class="district-item" onclick="viewCourt('${state}-${district}')">${district}</div>`
+                ).join('');
+            } else {
+                districtList.style.display = 'none';
+            }
+        });
+
+        function viewCourt(courtId) {
+            // Navigate to court details or cause list
+            window.location.href = `calendar.html?court=${courtId}`;
+        }
+
+        function showStateSelector() {
+            document.getElementById('stateSelector').focus();
+            document.getElementById('stateSelector').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
