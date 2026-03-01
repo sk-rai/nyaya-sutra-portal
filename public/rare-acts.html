@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rare Acts Collection | Nyaya Sutra</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tiers.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .acts-container {
+            padding: 2rem 0;
+            min-height: 100vh;
+            background: var(--gray-light);
+        }
+
+        .page-header {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--gray-medium);
+            font-size: 1.1rem;
+        }
+
+        .search-bar {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-primary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--navy-dark);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+            font-size: 1.2rem;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--navy-dark);
+            background: var(--white);
+            color: var(--navy-dark);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: var(--navy-dark);
+            color: var(--gold-primary);
+        }
+
+        .acts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .act-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid var(--navy-dark);
+        }
+
+        .act-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .act-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .act-year {
+            padding: 0.25rem 0.75rem;
+            background: var(--gold-primary);
+            color: var(--navy-dark);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .bookmark-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .bookmark-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .bookmark-btn.bookmarked {
+            color: var(--gold-primary);
+        }
+
+        .act-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .act-description {
+            color: var(--gray-medium);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .act-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+        }
+
+        .act-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .act-tag {
+            padding: 0.25rem 0.75rem;
+            background: var(--gray-light);
+            color: var(--navy-dark);
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .act-actions {
+            display: flex;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .act-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .act-btn-primary {
+            background: var(--navy-dark);
+            color: var(--gold-primary);
+        }
+
+        .act-btn-secondary {
+            background: var(--gray-light);
+            color: var(--navy-dark);
+        }
+
+        .act-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .featured-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--gold-primary);
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .featured-item {
+            padding: 1rem;
+            background: var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .featured-item:hover {
+            background: var(--navy-dark);
+            color: var(--gold-primary);
+        }
+
+        .featured-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .featured-year {
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+        }
+
+        .featured-item:hover .featured-year {
+            color: var(--gold-light);
+        }
+
+        .empty-state {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-text {
+            color: var(--gray-medium);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .acts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="acts-container">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Rare Acts Collection</h1>
+                <p class="page-subtitle">Comprehensive collection of important and rare legal acts</p>
+            </div>
+
+            <!-- Featured Acts -->
+            <div class="featured-section">
+                <h2 class="section-title">Featured Acts</h2>
+                <div class="featured-grid">
+                    <div class="featured-item" onclick="searchByAct('Constitution of India')">
+                        <div class="featured-title">Constitution of India</div>
+                        <div class="featured-year">1950</div>
+                    </div>
+                    <div class="featured-item" onclick="searchByAct('Indian Penal Code')">
+                        <div class="featured-title">Indian Penal Code</div>
+                        <div class="featured-year">1860</div>
+                    </div>
+                    <div class="featured-item" onclick="searchByAct('Code of Civil Procedure')">
+                        <div class="featured-title">Code of Civil Procedure</div>
+                        <div class="featured-year">1908</div>
+                    </div>
+                    <div class="featured-item" onclick="searchByAct('Armed Forces Tribunal Act')">
+                        <div class="featured-title">Armed Forces Tribunal Act</div>
+                        <div class="featured-year">2007</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="actSearch" 
+                           placeholder="Search acts by name, year, or keyword...">
+                </div>
+                <div class="category-filters">
+                    <button class="category-btn active" data-category="all">All Acts</button>
+                    <button class="category-btn" data-category="constitutional">Constitutional</button>
+                    <button class="category-btn" data-category="criminal">Criminal</button>
+                    <button class="category-btn" data-category="civil">Civil</button>
+                    <button class="category-btn" data-category="service">Service Law</button>
+                    <button class="category-btn" data-category="administrative">Administrative</button>
+                    <button class="category-btn" data-category="tribunal">Tribunal</button>
+                </div>
+            </div>
+
+            <!-- Acts Grid -->
+            <div class="acts-grid" id="actsGrid">
+                <!-- Act cards will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Mock acts data
+        const acts = [
+            {
+                id: 1,
+                title: "Armed Forces Tribunal Act",
+                year: 2007,
+                category: "tribunal",
+                description: "An Act to provide for the adjudication or trial by Armed Forces Tribunal of disputes and complaints with respect to commission, appointments, enrolments and conditions of service.",
+                sections: 32,
+                amendments: 3,
+                tags: ["Military", "Tribunal", "Service Law"],
+                bookmarked: false
+            },
+            {
+                id: 2,
+                title: "Central Administrative Tribunal Act",
+                year: 1985,
+                category: "administrative",
+                description: "An Act to provide for the adjudication of disputes and complaints with respect to recruitment and conditions of service of persons appointed to public services and posts.",
+                sections: 35,
+                amendments: 5,
+                tags: ["Administrative", "Service Law", "Government"],
+                bookmarked: false
+            },
+            {
+                id: 3,
+                title: "Constitution of India",
+                year: 1950,
+                category: "constitutional",
+                description: "The supreme law of India. The document lays down the framework that demarcates fundamental political code, structure, procedures, powers, and duties of government institutions.",
+                sections: 395,
+                amendments: 105,
+                tags: ["Constitutional", "Fundamental Rights", "Supreme Law"],
+                bookmarked: true
+            },
+            {
+                id: 4,
+                title: "Indian Penal Code",
+                year: 1860,
+                category: "criminal",
+                description: "The official criminal code of India. It is a comprehensive code intended to cover all substantive aspects of criminal law.",
+                sections: 511,
+                amendments: 75,
+                tags: ["Criminal", "Penal", "Offences"],
+                bookmarked: false
+            },
+            {
+                id: 5,
+                title: "Code of Civil Procedure",
+                year: 1908,
+                category: "civil",
+                description: "The procedural law related to the administration of civil proceedings in India. The Code applies to all civil proceedings in all Courts in India.",
+                sections: 158,
+                amendments: 46,
+                tags: ["Civil", "Procedure", "Courts"],
+                bookmarked: false
+            },
+            {
+                id: 6,
+                title: "Administrative Tribunals Act",
+                year: 1985,
+                category: "administrative",
+                description: "An Act to provide for the establishment of Administrative Tribunals for the adjudication of disputes and complaints with respect to recruitment and conditions of service.",
+                sections: 42,
+                amendments: 8,
+                tags: ["Administrative", "Tribunals", "Service"],
+                bookmarked: false
+            }
+        ];
+
+        let bookmarkedActs = JSON.parse(localStorage.getItem('bookmarkedActs') || '[]');
+
+        function renderActs(filteredActs) {
+            const actsGrid = document.getElementById('actsGrid');
+            
+            if (filteredActs.length === 0) {
+                actsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-icon">📚</div>
+                        <div class="empty-text">No acts found matching your search</div>
+                    </div>
+                `;
+                return;
+            }
+
+            actsGrid.innerHTML = filteredActs.map(act => `
+                <div class="act-card">
+                    <div class="act-header">
+                        <span class="act-year">${act.year}</span>
+                        <button class="bookmark-btn ${bookmarkedActs.includes(act.id) ? 'bookmarked' : ''}" 
+                                onclick="toggleBookmark(${act.id})">
+                            ${bookmarkedActs.includes(act.id) ? '★' : '☆'}
+                        </button>
+                    </div>
+                    <h3 class="act-title">${act.title}</h3>
+                    <p class="act-description">${act.description}</p>
+                    <div class="act-meta">
+                        <span class="meta-item">📄 ${act.sections} Sections</span>
+                        <span class="meta-item">✏️ ${act.amendments} Amendments</span>
+                    </div>
+                    <div class="act-tags">
+                        ${act.tags.map(tag => `<span class="act-tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="act-actions">
+                        <button class="act-btn act-btn-primary" onclick="viewAct(${act.id})">
+                            View Act
+                        </button>
+                        <button class="act-btn act-btn-secondary" onclick="downloadAct(${act.id})">
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initial render
+        renderActs(acts);
+
+        // Search functionality
+        document.getElementById('actSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = acts.filter(act => 
+                act.title.toLowerCase().includes(searchTerm) ||
+                act.description.toLowerCase().includes(searchTerm) ||
+                act.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                act.year.toString().includes(searchTerm)
+            );
+            renderActs(filtered);
+        });
+
+        // Category filters
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const category = this.dataset.category;
+                const filtered = category === 'all' ? acts : 
+                    acts.filter(act => act.category === category);
+                renderActs(filtered);
+            });
+        });
+
+        function toggleBookmark(actId) {
+            const index = bookmarkedActs.indexOf(actId);
+            if (index > -1) {
+                bookmarkedActs.splice(index, 1);
+            } else {
+                bookmarkedActs.push(actId);
+            }
+            localStorage.setItem('bookmarkedActs', JSON.stringify(bookmarkedActs));
+            
+            // Re-render to update bookmark icon
+            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            const filtered = activeCategory === 'all' ? acts : 
+                acts.filter(act => act.category === activeCategory);
+            renderActs(filtered);
+        }
+
+        function viewAct(actId) {
+            const act = acts.find(a => a.id === actId);
+            alert(`Viewing: ${act.title}\n\nThis would open the full act with all sections and amendments.`);
+        }
+
+        function downloadAct(actId) {
+            const act = acts.find(a => a.id === actId);
+            alert(`Downloading PDF: ${act.title}\n\nIn production, this would download the PDF file.`);
+        }
+
+        function searchByAct(actName) {
+            document.getElementById('actSearch').value = actName;
+            const filtered = acts.filter(act => 
+                act.title.toLowerCase().includes(actName.toLowerCase())
+            );
+            renderActs(filtered);
+        }
+    </script>
+</body>
+</html>
