@@ -26,9 +26,12 @@ def create_app(config_name=None):
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
+
+    # CORS — support comma-separated origins in CORS_ORIGIN env var
+    cors_origins = [o.strip() for o in app.config["CORS_ORIGIN"].split(",")]
     cors.init_app(
         app,
-        origins=[app.config["CORS_ORIGIN"]],
+        origins=cors_origins,
         supports_credentials=True,
         allow_headers=["Authorization", "Content-Type"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],

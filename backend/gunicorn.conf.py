@@ -4,10 +4,10 @@ import multiprocessing
 import os
 
 # Server socket
-bind = os.getenv("GUNICORN_BIND", "0.0.0.0:5000")
+bind = os.getenv("GUNICORN_BIND", f"0.0.0.0:{os.getenv('PORT', '5000')}")
 
-# Worker processes
-workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2 + 1))
+# Worker processes — Render free tier has limited memory, use fewer workers
+workers = int(os.getenv("GUNICORN_WORKERS", min(multiprocessing.cpu_count() * 2 + 1, 4)))
 worker_class = "sync"
 worker_connections = 1000
 timeout = 120
