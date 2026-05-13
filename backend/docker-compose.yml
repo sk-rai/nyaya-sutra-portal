@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://nyaya_app:NyayaSutra2026!@db:5432/nyaya_sutra
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://sk-rai.github.io}
+      - REDIS_URL=redis://redis:6379/0
+      - FLASK_ENV=production
+      - ENABLE_SCHEDULER=true
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=nyaya_app
+      - POSTGRES_PASSWORD=NyayaSutra2026!
+      - POSTGRES_DB=nyaya_sutra
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../backend/schema/001_initial_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nyaya_app -d nyaya_sutra"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

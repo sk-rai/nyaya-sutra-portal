@@ -1,0 +1,15 @@
+Flask==3.1.0
+Flask-SQLAlchemy==3.1.1
+Flask-JWT-Extended==4.7.1
+Flask-CORS==5.0.1
+psycopg2-binary==2.9.9
+APScheduler==3.10.4
+hypothesis==6.112.1
+pytest==8.3.4
+razorpay==1.4.2
+bcrypt==4.2.1
+requests==2.32.3
+pdfplumber==0.11.4
+beautifulsoup4==4.12.3
+python-dotenv==1.0.1
+gunicorn==23.0.0
