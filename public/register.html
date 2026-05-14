@@ -394,9 +394,19 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
         let selectedPlanValue = 'normal';
+
+        // Redirect if already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            if (NyayaAPI.isLoggedIn()) {
+                window.location.href = 'my-dashboard.html';
+            }
+            // Initialize plan visibility
+            toggleAdvocateFields();
+        });
 
         function toggleAdvocateFields() {
             const advocateFields = document.getElementById('advocateFields');
@@ -408,7 +418,6 @@
                 document.getElementById('enrollmentDate').required = true;
                 document.getElementById('barCouncil').required = true;
 
-                // Show only Normal, Premium, and Super Premium for advocates
                 planBoxes.forEach(box => {
                     if (box.dataset.plan === 'basic') {
                         box.style.display = 'none';
@@ -416,14 +425,12 @@
                         box.style.display = 'block';
                     }
                 });
-                // Select normal by default for advocates
                 selectPlan('normal');
             } else {
                 advocateFields.classList.remove('show');
                 document.getElementById('enrollmentDate').required = false;
                 document.getElementById('barCouncil').required = false;
 
-                // Show only Basic for individuals
                 planBoxes.forEach(box => {
                     if (box.dataset.plan === 'basic') {
                         box.style.display = 'block';
@@ -431,64 +438,64 @@
                         box.style.display = 'none';
                     }
                 });
-                // Select basic by default for individuals
                 selectPlan('basic');
             }
         }
 
         function selectPlan(plan) {
-            // Remove selected class from all boxes
             document.querySelectorAll('.plan-box').forEach(box => {
                 box.classList.remove('selected');
             });
-
-            // Add selected class to clicked box
-            document.querySelector(`[data-plan="${plan}"]`).classList.add('selected');
-
-            // Update hidden input
+            const el = document.querySelector(`[data-plan="${plan}"]`);
+            if (el) el.classList.add('selected');
             document.getElementById('selectedPlan').value = plan;
             selectedPlanValue = plan;
         }
 
-        function handleRegister(event) {
+        async function handleRegister(event) {
             event.preventDefault();
 
-            const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
-                rank: document.getElementById('rank').value,
-                country: document.getElementById('country').value,
-                userType: document.querySelector('input[name="userType"]:checked').value,
-                plan: selectedPlanValue
+            const userType = document.querySelector('input[name="userType"]:checked').value;
+            const phone = document.getElementById('phone').value.replace(/^\+91\s*/, '').replace(/\s/g, '');
+
+            const registrationData = {
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: phone,
+                user_type: userType,
             };
 
-            // Add advocate-specific fields if applicable
-            if (formData.userType === 'advocate') {
-                formData.enrollmentDate = document.getElementById('enrollmentDate').value;
-                formData.barCouncil = document.getElementById('barCouncil').value;
+            // Add advocate-specific fields
+            if (userType === 'advocate') {
+                registrationData.enrollment_no = document.getElementById('enrollmentDate').value;
+                registrationData.bar_council = document.getElementById('barCouncil').value;
             }
 
-            // Store user data
-            localStorage.setItem('userData', JSON.stringify(formData));
+            const submitBtn = document.querySelector('.btn-register');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
 
-            // Determine tier based on plan
-            let tier = 'unpaid';
-            if (formData.plan === 'standard' || formData.plan === 'premium') {
-                tier = 'paid';
+            try {
+                // Register via API
+                const user = await NyayaAPI.register(registrationData);
+
+                // Now request OTP for the new user
+                const identifier = registrationData.email || registrationData.phone;
+                await NyayaAPI.requestOTP(identifier, 'register');
+
+                alert(
+                    'Registration successful! An OTP has been sent to your email/phone.\n\n' +
+                    'Please go to the login page and verify your OTP to complete setup.\n\n' +
+                    '(Check Render logs for the OTP code during testing)'
+                );
+
+                window.location.href = 'login.html';
+
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+                alert('Registration failed: ' + err.message);
             }
-
-            // Register user
-            localStorage.setItem('userEmail', formData.email);
-            localStorage.setItem('userName', formData.name);
-            localStorage.setItem('userTier', tier);
-            localStorage.setItem('userType', formData.userType);
-            localStorage.setItem('isLoggedIn', 'true');
-
-            // Redirect to dashboard
-            alert('Registration successful! Redirecting to your dashboard...');
-            window.location.href = 'my-dashboard.html';
         }
     </script>
 </body>
