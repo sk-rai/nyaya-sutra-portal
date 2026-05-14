@@ -55,4 +55,7 @@ fi
 echo "Seeding test accounts..."
 python seed_test_accounts.py || echo "WARNING: Test account seeding failed (non-fatal)."
 
+echo "Seeding sample case data..."
+python seed_sample_cases.py || echo "WARNING: Sample case seeding failed (non-fatal)."
+
 echo "Build complete."
