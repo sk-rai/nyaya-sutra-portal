@@ -306,10 +306,12 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
         let otpSent = false;
         let currentCaptcha = 'AB12CD';
+        let currentIdentifier = '';
 
         // OTP input handling
         document.addEventListener('DOMContentLoaded', () => {
@@ -328,6 +330,11 @@
                     }
                 });
             });
+
+            // If already logged in, redirect
+            if (NyayaAPI.isLoggedIn()) {
+                window.location.href = 'my-dashboard.html';
+            }
         });
 
         function refreshCaptcha() {
@@ -340,78 +347,95 @@
             document.getElementById('captchaText').textContent = captcha;
         }
 
-        function resendOTP() {
-            alert('OTP resent successfully! (Demo mode - any 6 digits work)');
+        async function resendOTP() {
+            if (!currentIdentifier) return;
+            try {
+                await NyayaAPI.requestOTP(currentIdentifier, 'login');
+                showMessage('OTP resent successfully! Check Render logs for the code.', 'success');
+            } catch (err) {
+                showMessage(err.message, 'error');
+            }
         }
 
-        function handleLogin(event) {
+        function showMessage(msg, type) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = msg;
+            errorDiv.classList.add('show');
+            errorDiv.style.color = type === 'success' ? 'green' : 'var(--danger)';
+        }
+
+        async function handleLogin(event) {
             event.preventDefault();
 
             const errorDiv = document.getElementById('loginError');
             errorDiv.classList.remove('show');
+            const loginBtn = document.getElementById('loginBtn');
 
             if (!otpSent) {
-                // Step 1: Verify captcha and send OTP
-                const emailOrPhone = document.getElementById('emailOrPhone').value;
+                // Step 1: Verify captcha and request OTP from backend
+                const emailOrPhone = document.getElementById('emailOrPhone').value.trim();
                 const captchaInput = document.getElementById('captcha').value.toUpperCase();
 
                 if (captchaInput !== currentCaptcha) {
-                    errorDiv.textContent = 'Invalid captcha. Please try again.';
-                    errorDiv.classList.add('show');
+                    showMessage('Invalid captcha. Please try again.', 'error');
                     return;
                 }
 
-                // Hide captcha, show OTP
-                document.getElementById('captchaGroup').style.display = 'none';
-                document.getElementById('otpGroup').style.display = 'block';
-                document.getElementById('loginBtn').textContent = 'Verify & Sign In';
-                otpSent = true;
+                // Clean phone number (remove +91, spaces)
+                currentIdentifier = emailOrPhone.replace(/^\+91\s*/, '').replace(/\s/g, '');
 
-                // Auto-fill OTP for demo
-                setTimeout(() => {
-                    const otpInputs = document.querySelectorAll('.otp-digit');
-                    '123456'.split('').forEach((digit, index) => {
-                        otpInputs[index].value = digit;
-                    });
-                }, 500);
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Sending OTP...';
+
+                try {
+                    const result = await NyayaAPI.requestOTP(currentIdentifier, 'login');
+
+                    // Hide captcha, show OTP
+                    document.getElementById('captchaGroup').style.display = 'none';
+                    document.getElementById('otpGroup').style.display = 'block';
+                    loginBtn.textContent = 'Verify & Sign In';
+                    loginBtn.disabled = false;
+                    otpSent = true;
+
+                    showMessage(`OTP sent via ${result.channel}. Check your ${result.channel === 'email' ? 'inbox' : 'phone'} (or Render logs for testing).`, 'success');
+
+                } catch (err) {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Send OTP';
+                    showMessage(err.message, 'error');
+                }
 
             } else {
-                // Step 2: Verify OTP and login
+                // Step 2: Verify OTP with backend
                 const otpInputs = document.querySelectorAll('.otp-digit');
                 const otp = Array.from(otpInputs).map(input => input.value).join('');
 
                 if (otp.length !== 6) {
-                    errorDiv.textContent = 'Please enter complete OTP.';
-                    errorDiv.classList.add('show');
+                    showMessage('Please enter complete 6-digit OTP.', 'error');
                     return;
                 }
 
-                const emailOrPhone = document.getElementById('emailOrPhone').value;
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Verifying...';
 
-                // Mock login logic
-                let tier = 'unpaid';
-                let email = emailOrPhone;
+                try {
+                    const result = await NyayaAPI.verifyOTP(currentIdentifier, otp);
 
-                if (emailOrPhone.includes('paid') || emailOrPhone.includes('8888')) {
-                    tier = 'paid';
-                    email = 'paid@example.com';
-                } else {
-                    email = 'unpaid@example.com';
+                    // Store legacy localStorage values for backward compatibility
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userEmail', result.user.email || currentIdentifier);
+                    localStorage.setItem('userTier', result.user.tier || 'free');
+                    localStorage.setItem('userName', result.user.name || 'User');
+
+                    // Redirect to dashboard
+                    window.location.href = 'my-dashboard.html';
+
+                } catch (err) {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Verify & Sign In';
+                    showMessage(err.message, 'error');
                 }
-
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userTier', tier);
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userName', tier === 'paid' ? 'Mr. ABC Singh' : 'Mr. John Doe');
-
-                // Redirect to dashboard
-                window.location.href = 'my-dashboard.html';
             }
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            window.location.href = 'register.html';
         }
     </script>
 </body>

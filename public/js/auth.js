@@ -1,57 +1,35 @@
-// Authentication & Tier Management
-
-// Mock login function (replace with actual auth later)
-function login(email, password) {
-  // Mock users for demo
-  const mockUsers = {
-    'guest@example.com': { tier: 'unregistered' },
-    'unpaid@example.com': { tier: 'unpaid' },
-    'paid@example.com': { tier: 'paid' }
-  };
-
-  const user = mockUsers[email];
-
-  if (user) {
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userTier', user.tier);
-    localStorage.setItem('isLoggedIn', 'true');
-
-    // Redirect to index page
-    window.location.href = 'index.html';
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// Mock register function
-function register(email, password, tier = 'unpaid') {
-  localStorage.setItem('userEmail', email);
-  localStorage.setItem('userTier', tier);
-  localStorage.setItem('isLoggedIn', 'true');
-
-  window.location.href = 'index.html';
-}
-
-// Logout function
-function logout() {
-  localStorage.removeItem('userEmail');
-  localStorage.removeItem('userTier');
-  localStorage.removeItem('isLoggedIn');
-  window.location.href = 'dashboard.html';
-}
+/**
+ * Authentication & Session Management
+ * Works with NyayaAPI service layer for real backend calls.
+ */
 
 // Check if user is logged in
 function checkAuth() {
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  const userTier = localStorage.getItem('userTier') || 'unregistered';
+  const isLoggedIn = NyayaAPI.isLoggedIn();
+  const user = NyayaAPI.getUser();
+  const userTier = user ? user.tier : 'free';
 
-  return { isLoggedIn, userTier };
+  return { isLoggedIn, userTier, user };
 }
 
 // Get current user tier
 function getCurrentTier() {
-  return localStorage.getItem('userTier') || 'unregistered';
+  return NyayaAPI.getUserTier();
+}
+
+// Logout function
+async function logout() {
+  await NyayaAPI.logout();
+  window.location.href = 'dashboard.html';
+}
+
+// Redirect to login if not authenticated
+function requireAuth() {
+  if (!NyayaAPI.isLoggedIn()) {
+    window.location.href = 'login.html';
+    return false;
+  }
+  return true;
 }
 
 // Initialize auth state on page load
@@ -60,4 +38,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Update body class based on tier
   document.body.classList.add(`tier-${userTier}`);
+
+  // Update nav login/logout buttons if they exist
+  const loginBtn = document.querySelector('.btn-login-nav');
+  const logoutBtn = document.querySelector('.btn-logout-nav');
+  const userNameEl = document.querySelector('.user-name-display');
+
+  if (isLoggedIn) {
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+    if (userNameEl) {
+      const user = NyayaAPI.getUser();
+      userNameEl.textContent = user ? user.name : '';
+    }
+  } else {
+    if (loginBtn) loginBtn.style.display = 'inline-block';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+  }
 });
