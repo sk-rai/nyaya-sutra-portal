@@ -204,6 +204,29 @@
     </div>
   </footer>
 
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navAuthBtn = document.getElementById('navAuthBtn');
+      if (NyayaAPI.isLoggedIn()) {
+        const user = NyayaAPI.getUser();
+        const tierLabels = { 'free': 'Free', 'individual': 'Individual', 'advocate_normal': 'Advocate', 'advocate_premium': 'Premium' };
+        const tierLabel = tierLabels[user.tier] || user.tier;
+        const userType = user.user_type === 'advocate' ? '⚖️ Advocate' : '👤 Individual';
+
+        navAuthBtn.outerHTML = `
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; color: white;">
+              <strong>${user.name}</strong> | ${userType} | ${tierLabel}
+            </div>
+            <button class="btn btn-outline" onclick="window.location.href='my-dashboard.html'" style="padding: 6px 12px; font-size: 0.85rem;">My Dashboard</button>
+            <button class="btn btn-outline" onclick="NyayaAPI.logout().then(()=>location.reload())" style="padding: 6px 12px; font-size: 0.85rem;">Logout</button>
+          </div>
+        `;
+      }
+    });
+  </script>
 </body>
 
 </html>
