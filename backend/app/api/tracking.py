@@ -64,7 +64,7 @@ def track_case():
     tier = claims.get("tier", "free")
 
     service = CaseCacheService()
-    result = service.track_case(user_id, case_id, alerts, tier)
+    result = service.track_case(user_id, case_id, alerts)
 
     return success_response(result, status=201)
 
