@@ -358,55 +358,131 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        // Mock filing data
-        const filings = [
-            {
-                id: 1,
-                caseNumber: "AFT/DEL/2026/1234",
-                court: "AFT Delhi",
-                filingType: "Original Application",
-                status: "accepted",
-                submissionDate: "2026-02-15",
-                ackNumber: "ACK/2026/5678",
-                documents: 5,
-                paymentStatus: "Paid"
-            },
-            {
-                id: 2,
-                caseNumber: "CAT/DEL/2026/5678",
-                court: "CAT Delhi",
-                filingType: "Appeal",
-                status: "pending",
-                submissionDate: "2026-02-20",
-                ackNumber: "ACK/2026/9012",
-                documents: 3,
-                paymentStatus: "Pending"
-            },
-            {
-                id: 3,
-                caseNumber: "HC/DEL/2026/3456",
-                court: "Delhi High Court",
-                filingType: "Writ Petition",
-                status: "submitted",
-                submissionDate: "2026-02-25",
-                ackNumber: "ACK/2026/3456",
-                documents: 8,
-                paymentStatus: "Paid"
-            },
-            {
-                id: 4,
-                caseNumber: "AFT/MUM/2026/7890",
-                court: "AFT Mumbai",
-                filingType: "Miscellaneous Application",
-                status: "rejected",
-                submissionDate: "2026-02-10",
-                ackNumber: "ACK/2026/7890",
-                documents: 2,
-                paymentStatus: "Refunded"
+        let selectedCourtCode = '';
+        let allCourts = [];
+
+        // Load courts from API on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check URL params for pre-selected court
+            const params = new URLSearchParams(window.location.search);
+            const courtParam = params.get('court');
+            if (courtParam) selectedCourtCode = courtParam;
+
+            try {
+                allCourts = await NyayaAPI.getCourts();
+            } catch (err) {
+                console.log('Courts API unavailable, using tabs only');
             }
-        ];
+
+            // Load tracked cases if logged in
+            if (NyayaAPI.isLoggedIn()) {
+                loadTrackedCases();
+            } else {
+                renderFilings([]);
+            }
+        });
+
+        async function loadTrackedCases() {
+            try {
+                const tracked = await NyayaAPI.getTrackedCases();
+                if (tracked && tracked.length > 0) {
+                    renderFilings(tracked.map(formatTrackedCase));
+                    updateStats(tracked);
+                } else {
+                    renderFilings([]);
+                }
+            } catch (err) {
+                console.log('Could not load tracked cases:', err.message);
+                renderFilings([]);
+            }
+        }
+
+        function formatTrackedCase(tc) {
+            return {
+                id: tc.case_id || tc.id,
+                caseNumber: tc.case_number || 'N/A',
+                court: tc.court_name || tc.court_code || '',
+                filingType: tc.case_title || '',
+                status: tc.freshness || 'pending',
+                submissionDate: tc.fetched_at || '',
+                ackNumber: '',
+                documents: 0,
+                paymentStatus: '',
+                freshness: tc.freshness,
+            };
+        }
+
+        function updateStats(tracked) {
+            const stats = document.querySelectorAll('.stat-number');
+            if (stats.length >= 4) {
+                stats[0].textContent = tracked.length;
+                stats[1].textContent = tracked.filter(t => t.freshness === 'stale' || t.freshness === 'very_stale').length;
+                stats[2].textContent = tracked.filter(t => t.freshness === 'fresh').length;
+                stats[3].textContent = tracked.filter(t => t.freshness === 'recent').length;
+            }
+            // Update labels
+            const labels = document.querySelectorAll('.stat-label');
+            if (labels.length >= 4) {
+                labels[0].textContent = 'Tracked Cases';
+                labels[1].textContent = 'Stale';
+                labels[2].textContent = 'Fresh';
+                labels[3].textContent = 'Recent';
+            }
+        }
+
+        async function searchFilings() {
+            const caseNumber = document.getElementById('caseNumber').value.trim();
+            if (!caseNumber) {
+                alert('Please enter a case number');
+                return;
+            }
+
+            if (!NyayaAPI.isLoggedIn()) {
+                alert('Please login to search cases');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Determine court code from active tab or URL param
+            const activeTab = document.querySelector('.court-tab.active');
+            let courtCode = selectedCourtCode || (activeTab ? activeTab.dataset.court : 'aft_del');
+            if (courtCode === 'all') courtCode = 'aft_del'; // Default
+
+            const searchBtn = document.querySelector('.search-form .btn');
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+
+            try {
+                const result = await NyayaAPI.searchCase(courtCode, caseNumber);
+                if (result) {
+                    renderFilings([{
+                        id: result.id || '1',
+                        caseNumber: result.case_number || caseNumber,
+                        court: result.court_code || courtCode,
+                        filingType: result.case_title || '',
+                        status: result.freshness || 'fresh',
+                        submissionDate: result.fetched_at || new Date().toISOString(),
+                        ackNumber: '',
+                        documents: 0,
+                        paymentStatus: '',
+                        freshness: result.freshness,
+                        canTrack: true,
+                        caseId: result.id,
+                    }]);
+                } else {
+                    renderFilings([]);
+                }
+            } catch (err) {
+                alert(err.message);
+                renderFilings([]);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search';
+            }
+        }
 
         function renderFilings(filteredFilings) {
             const filingsList = document.getElementById('filingsList');
@@ -415,7 +491,7 @@
                 filingsList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📄</div>
-                        <div class="empty-text">No filings found</div>
+                        <div class="empty-text">No cases found. Search for a case above or track cases from your dashboard.</div>
                         <button class="btn btn-primary" onclick="window.location.href='my-dashboard.html'">
                             Go to Dashboard
                         </button>
@@ -428,8 +504,8 @@
                 <div class="filing-card">
                     <div class="filing-header">
                         <div class="filing-number">${filing.caseNumber}</div>
-                        <span class="filing-status status-${filing.status}">
-                            ${filing.status.charAt(0).toUpperCase() + filing.status.slice(1)}
+                        <span class="filing-status status-${filing.freshness === 'fresh' ? 'accepted' : filing.freshness === 'recent' ? 'submitted' : 'pending'}">
+                            ${filing.freshness || filing.status}
                         </span>
                     </div>
                     <div class="filing-details">
@@ -438,54 +514,44 @@
                             <span class="detail-value">${filing.court}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Filing Type</span>
-                            <span class="detail-value">${filing.filingType}</span>
+                            <span class="detail-label">Case Title</span>
+                            <span class="detail-value">${filing.filingType || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Submission Date</span>
-                            <span class="detail-value">${new Date(filing.submissionDate).toLocaleDateString('en-IN')}</span>
+                            <span class="detail-label">Last Updated</span>
+                            <span class="detail-value">${filing.submissionDate ? new Date(filing.submissionDate).toLocaleDateString('en-IN') : 'N/A'}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Acknowledgment No</span>
-                            <span class="detail-value">${filing.ackNumber}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Documents</span>
-                            <span class="detail-value">${filing.documents} files</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Payment Status</span>
-                            <span class="detail-value">${filing.paymentStatus}</span>
+                            <span class="detail-label">Data Freshness</span>
+                            <span class="detail-value">${filing.freshness || 'unknown'}</span>
                         </div>
                     </div>
                     <div class="filing-actions">
-                        <button class="action-btn action-btn-primary" onclick="viewDetails(${filing.id})">
+                        ${filing.canTrack ? `<button class="action-btn action-btn-primary" onclick="trackThisCase('${filing.caseId}')">Track Case</button>` : ''}
+                        <button class="action-btn action-btn-secondary" onclick="viewDetails('${filing.id}')">
                             View Details
-                        </button>
-                        <button class="action-btn action-btn-secondary" onclick="downloadAck(${filing.id})">
-                            Download Acknowledgment
-                        </button>
-                        <button class="action-btn action-btn-secondary" onclick="trackStatus(${filing.id})">
-                            Track Status
                         </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Initial render
-        renderFilings(filings);
+        async function trackThisCase(caseId) {
+            if (!caseId) return;
+            try {
+                await NyayaAPI.trackCase(caseId);
+                alert('Case tracked successfully!');
+            } catch (err) {
+                alert(err.message);
+            }
+        }
 
-        // Event listeners
+        // Event listeners for court tabs
         document.querySelectorAll('.court-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.court-tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                
-                const court = this.dataset.court;
-                const filtered = court === 'all' ? filings : 
-                    filings.filter(f => f.court.toLowerCase().includes(court));
-                renderFilings(filtered);
+                selectedCourtCode = this.dataset.court;
             });
         });
 
@@ -493,36 +559,11 @@
             filter.addEventListener('click', function() {
                 document.querySelectorAll('.status-filter').forEach(f => f.classList.remove('active'));
                 this.classList.add('active');
-                
-                const status = this.dataset.status;
-                const filtered = status === 'all' ? filings : 
-                    filings.filter(f => f.status === status);
-                renderFilings(filtered);
             });
         });
 
-        function searchFilings() {
-            const caseNumber = document.getElementById('caseNumber').value.toLowerCase();
-            const ackNumber = document.getElementById('ackNumber').value.toLowerCase();
-            
-            const filtered = filings.filter(f => 
-                f.caseNumber.toLowerCase().includes(caseNumber) &&
-                f.ackNumber.toLowerCase().includes(ackNumber)
-            );
-            
-            renderFilings(filtered);
-        }
-
         function viewDetails(id) {
-            alert(`Viewing details for filing ID: ${id}`);
-        }
-
-        function downloadAck(id) {
-            alert(`Downloading acknowledgment for filing ID: ${id}`);
-        }
-
-        function trackStatus(id) {
-            alert(`Tracking status for filing ID: ${id}`);
+            alert('Case details view coming soon.');
         }
     </script>
 </body>

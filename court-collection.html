@@ -225,6 +225,7 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script>
         const districtsByState = {
             'delhi': ['Central Delhi', 'East Delhi', 'New Delhi', 'North Delhi', 'South Delhi', 'West Delhi'],
@@ -234,6 +235,52 @@
             'west-bengal': ['Kolkata', 'Howrah', 'North 24 Parganas', 'South 24 Parganas', 'Hooghly'],
             'rajasthan': ['Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Udaipur']
         };
+
+        // Load courts from API on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const courts = await NyayaAPI.getCourts();
+                if (courts && courts.length > 0) {
+                    populateCourtLists(courts);
+                }
+            } catch (err) {
+                console.log('Using static court data (API unavailable):', err.message);
+            }
+        });
+
+        function populateCourtLists(courts) {
+            // Group courts by type
+            const grouped = {};
+            courts.forEach(court => {
+                const type = court.court_type || 'other';
+                if (!grouped[type]) grouped[type] = [];
+                grouped[type].push(court);
+            });
+
+            // Update AFT list
+            const aftList = document.querySelector('.court-category:nth-child(3) .court-list');
+            if (grouped.aft && aftList) {
+                aftList.innerHTML = grouped.aft.map(c =>
+                    `<li class="court-item" onclick="viewCourt('${c.code}')">${c.name}</li>`
+                ).join('');
+            }
+
+            // Update CAT list
+            const catList = document.querySelector('.court-category:nth-child(4) .court-list');
+            if (grouped.cat && catList) {
+                catList.innerHTML = grouped.cat.map(c =>
+                    `<li class="court-item" onclick="viewCourt('${c.code}')">${c.name}</li>`
+                ).join('');
+            }
+
+            // Update HC list
+            const hcList = document.querySelector('.court-category:nth-child(2) .court-list');
+            if (grouped.hc && hcList) {
+                hcList.innerHTML = grouped.hc.map(c =>
+                    `<li class="court-item" onclick="viewCourt('${c.code}')">${c.name}</li>`
+                ).join('');
+            }
+        }
 
         document.getElementById('stateSelector').addEventListener('change', function(e) {
             const state = e.target.value;
@@ -250,8 +297,8 @@
         });
 
         function viewCourt(courtId) {
-            // Navigate to court details or cause list
-            window.location.href = `calendar.html?court=${courtId}`;
+            // Navigate to case search with court pre-selected
+            window.location.href = `efiling-status.html?court=${courtId}`;
         }
 
         function showStateSelector() {
