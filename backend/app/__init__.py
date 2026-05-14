@@ -115,6 +115,28 @@ def create_app(config_name=None):
             "error": None,
         })
 
+    # Root endpoint — friendly message
+    @app.route("/", methods=["GET"])
+    def root():
+        """Root endpoint with API info."""
+        from flask import jsonify
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "name": "Nyaya Sutra Backend API",
+                "version": "1.0.0",
+                "status": "running",
+                "docs": {
+                    "health": "/api/health",
+                    "courts": "/api/courts",
+                    "auth": "/api/auth/otp/request",
+                },
+                "frontend": "https://sk-rai.github.io/nyaya-sutra-portal/",
+            },
+            "error": None,
+        })
+
     # Optionally start background scheduler (not during testing)
     if not app.config.get("TESTING", False):
         # Only start scheduler if ENABLE_SCHEDULER is set (avoids double-start with gunicorn)
