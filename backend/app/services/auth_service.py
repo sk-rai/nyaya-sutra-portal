@@ -114,6 +114,16 @@ class AuthService:
         """
         identifier = identifier.strip()
 
+        # ─── Test OTP Bypass ────────────────────────────────────────
+        # For test accounts (@nyayasutra.test or 99000xxxxx), accept code "111111"
+        is_test_account = (
+            identifier.endswith("@nyayasutra.test")
+            or identifier.startswith("99000")
+        )
+        if is_test_account and otp_code == "111111":
+            return self._bypass_otp_for_test(identifier)
+        # ────────────────────────────────────────────────────────────
+
         # Find the latest valid OTP for this identifier
         otp_token = (
             OTPToken.query.filter_by(identifier=identifier)
@@ -280,3 +290,65 @@ class AuthService:
 
         session.revoked_at = datetime.now(timezone.utc)
         db.session.commit()
+
+    def _bypass_otp_for_test(self, identifier: str) -> dict:
+        """Bypass OTP verification for test accounts.
+
+        Directly issues a JWT for test accounts using code "111111".
+        Only works for @nyayasutra.test emails or 99000xxxxx phones.
+
+        Args:
+            identifier: Test account email or phone.
+
+        Returns:
+            Dict with token, user data, and expires_at.
+        """
+        # Find user by identifier
+        user = User.query.filter(
+            (User.email == identifier) | (User.phone == identifier)
+        ).first()
+
+        if not user:
+            raise NotFoundError("Test account not found. Run seed_test_accounts.py first.")
+
+        # Mark user as verified
+        user.is_verified = True
+        user.last_login = datetime.now(timezone.utc)
+
+        # Determine if this is an admin account
+        is_admin = (
+            identifier == "admin@nyayasutra.test"
+            or identifier == "9900000001"
+        )
+
+        # Issue JWT with user_id, tier, and admin claims
+        additional_claims = {
+            "user_id": str(user.id),
+            "tier": user.tier,
+            "is_admin": is_admin,
+        }
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims=additional_claims,
+        )
+
+        # Create session record
+        token_hash = hashlib.sha256(access_token.encode("utf-8")).hexdigest()
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=24)  # Longer for test accounts
+
+        session = UserSession(
+            user_id=user.id,
+            token_hash=token_hash,
+            expires_at=expires_at,
+        )
+
+        db.session.add(session)
+        db.session.commit()
+
+        logger.info(f"[TEST BYPASS] Issued token for test account: {identifier} (tier={user.tier}, admin={is_admin})")
+
+        return {
+            "token": access_token,
+            "user": user.to_dict(include_private=True),
+            "expires_at": expires_at.isoformat(),
+        }

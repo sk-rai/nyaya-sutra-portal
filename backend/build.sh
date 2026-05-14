@@ -52,4 +52,7 @@ else
     echo "WARNING: DATABASE_URL not set, skipping schema application."
 fi
 
+echo "Seeding test accounts..."
+python seed_test_accounts.py || echo "WARNING: Test account seeding failed (non-fatal)."
+
 echo "Build complete."
