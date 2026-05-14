@@ -490,41 +490,61 @@
         </div>
     </div>
 
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script>
         let selectedCourtValue = 'aft';
         let myCases = [];
 
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', () => {
-            const { isLoggedIn, userTier } = checkAuth();
+        // Court code mapping for API calls
+        const courtCodeMap = {
+            'aft': 'aft_del',
+            'cat': 'cat_del',
+            'highcourt': 'hc_del',
+            'supreme': 'sc',
+        };
 
-            if (!isLoggedIn) {
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!NyayaAPI.isLoggedIn()) {
                 window.location.href = 'login.html';
                 return;
             }
 
             // Update welcome message
-            const userName = localStorage.getItem('userName') || 'User';
+            const user = NyayaAPI.getUser();
+            const userName = user ? user.name : (localStorage.getItem('userName') || 'User');
             document.getElementById('welcomeTitle').textContent = `Hi, ${userName}`;
 
             // Update user menu
             const userMenu = document.getElementById('userMenu');
-            const tierLabel = userTier === 'unpaid' ? 'Free User' : 'Premium User';
+            const tier = NyayaAPI.getUserTier();
+            const tierLabels = {
+                'free': 'Free User',
+                'individual': 'Individual',
+                'advocate_normal': 'Advocate',
+                'advocate_premium': 'Advocate Premium',
+            };
             userMenu.innerHTML = `
-        <div class="user-info">
-          <span style="color: var(--white); font-size: 0.9rem;">${localStorage.getItem('userEmail')}</span>
-          <span class="user-tier-badge tier-${userTier}">${tierLabel}</span>
-        </div>
-        <button class="btn btn-logout" onclick="logout()">Logout</button>
-      `;
+                <div class="user-info">
+                    <span style="color: var(--white); font-size: 0.9rem;">${user ? (user.email || user.phone) : ''}</span>
+                    <span class="user-tier-badge">${tierLabels[tier] || tier}</span>
+                </div>
+                <button class="btn btn-logout" onclick="logout()">Logout</button>
+            `;
 
-            // Load saved cases
-            loadMyCases();
+            // Show synopsis section for premium users
+            if (tier === 'advocate_premium') {
+                const synopsisSection = document.getElementById('synopsisSection');
+                if (synopsisSection) synopsisSection.style.display = 'block';
+            }
+
+            // Load tracked cases from API
+            await loadTrackedCases();
         });
 
         function selectCourt(court) {
-            document.querySelectorAll('.court-btn').forEach(btn => {
+            document.querySelectorAll('#addCaseForm .court-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
@@ -532,66 +552,63 @@
             document.getElementById('selectedCourt').value = court;
         }
 
-        function addCase(event) {
+        async function addCase(event) {
             event.preventDefault();
 
-            const caseNo = document.getElementById('caseNo').value;
-            const caseTitle = document.getElementById('caseTitle').value;
+            const caseNo = document.getElementById('caseNo').value.trim();
             const court = selectedCourtValue;
+            const courtCode = courtCodeMap[court] || 'aft_del';
 
-            const newCase = {
-                id: Date.now(),
-                caseNo,
-                caseTitle,
-                court,
-                addedDate: new Date().toLocaleDateString()
-            };
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Searching...';
 
-            myCases.push(newCase);
-            localStorage.setItem('myCases', JSON.stringify(myCases));
+            try {
+                // Search for the case via API
+                const result = await NyayaAPI.searchCase(courtCode, caseNo);
 
-            // Reset form
-            document.getElementById('addCaseForm').reset();
-
-            // Reload cases
-            loadMyCases();
-
-            alert('Case added successfully!');
+                if (result && result.id) {
+                    // Track the case
+                    await NyayaAPI.trackCase(result.id);
+                    alert('Case found and tracked successfully!');
+                    await loadTrackedCases();
+                } else {
+                    alert('Case not found in the court database. It may not be in our system yet.');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Case';
+                document.getElementById('addCaseForm').reset();
+            }
         }
 
-        function loadMyCases() {
-            const savedCases = localStorage.getItem('myCases');
-            if (savedCases) {
-                myCases = JSON.parse(savedCases);
-            } else {
-                // Add some demo cases
-                myCases = [
-                    {
-                        id: 1,
-                        caseNo: 'AFT/DEL/2023/1234',
-                        caseTitle: 'Rajesh Kumar vs. Union of India',
-                        court: 'aft',
-                        addedDate: '15 Feb 2026',
-                        counselName: 'Adv. S. Patel',
-                        previousHearing: '10 Feb 2026',
-                        nextHearing: '20 Feb 2026',
-                        orders: 'For Hearing'
-                    },
-                    {
-                        id: 2,
-                        caseNo: 'CAT/DEL/2024/5678',
-                        caseTitle: 'Suresh Patel vs. Ministry of Defence',
-                        court: 'cat',
-                        addedDate: '18 Feb 2026',
-                        counselName: 'Adv. R. Singh',
-                        previousHearing: '15 Feb 2026',
-                        nextHearing: '25 Feb 2026',
-                        orders: 'Disposed'
-                    }
-                ];
-                localStorage.setItem('myCases', JSON.stringify(myCases));
+        async function loadTrackedCases() {
+            try {
+                const tracked = await NyayaAPI.getTrackedCases();
+                if (tracked && tracked.length > 0) {
+                    myCases = tracked.map(t => ({
+                        id: t.case_id || t.id,
+                        caseNo: t.case_number || 'N/A',
+                        caseTitle: t.case_title || t.petitioner + ' vs ' + t.respondent || '',
+                        court: t.court_code ? t.court_code.split('_')[0] : 'aft',
+                        addedDate: t.tracked_at ? new Date(t.tracked_at).toLocaleDateString('en-IN') : 'N/A',
+                        counselName: t.advocate_petitioner || 'N/A',
+                        previousHearing: t.last_hearing_date || 'N/A',
+                        nextHearing: t.next_hearing_date || 'N/A',
+                        orders: t.case_status || 'N/A',
+                        freshness: t.freshness || 'unknown',
+                    }));
+                } else {
+                    myCases = [];
+                }
+            } catch (err) {
+                console.log('Could not load tracked cases:', err.message);
+                // Fall back to localStorage
+                const saved = localStorage.getItem('myCases');
+                myCases = saved ? JSON.parse(saved) : [];
             }
-
             renderMyCases();
         }
 
@@ -601,58 +618,60 @@
 
             if (casesToRender.length === 0) {
                 casesList.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">📂</div>
-            <p>No cases added yet.</p>
-            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Add your first case using the form above.</p>
-          </div>
-        `;
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📂</div>
+                        <p>No cases tracked yet.</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Search and add cases using the form above.</p>
+                    </div>
+                `;
                 return;
             }
 
             casesList.innerHTML = casesToRender.map(caseItem => `
-        <div class="case-item">
-          <div class="case-item-header">
-            <span class="case-number">${caseItem.caseNo}</span>
-            <span class="case-court-badge court-${caseItem.court}">${caseItem.court.toUpperCase()}</span>
-          </div>
-          <div class="case-title">${caseItem.caseTitle}</div>
-          <div class="case-meta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1rem; font-size: 0.9rem;">
-            <div><strong>Name:</strong> ${caseItem.counselName || 'N/A'}</div>
-            <div><strong>Previous Hearing:</strong> ${caseItem.previousHearing || 'N/A'}</div>
-            <div><strong>Next Hearing:</strong> ${caseItem.nextHearing || 'N/A'}</div>
-            <div><strong>Orders:</strong> ${caseItem.orders || 'N/A'}</div>
-          </div>
-          <div style="font-size: 0.85rem; color: var(--gray-medium); margin-top: 0.5rem;">
-            Added on: ${caseItem.addedDate}
-          </div>
-          <div class="case-actions">
-            <button class="btn btn-outline btn-sm" onclick="viewCaseDetails(${caseItem.id})">View Details</button>
-            <button class="btn btn-outline btn-sm" onclick="deleteCase(${caseItem.id})">Delete</button>
-          </div>
-        </div>
-      `).join('');
+                <div class="case-item">
+                    <div class="case-item-header">
+                        <span class="case-number">${caseItem.caseNo}</span>
+                        <span class="case-court-badge court-${caseItem.court}">${caseItem.court.toUpperCase()}</span>
+                    </div>
+                    <div class="case-title">${caseItem.caseTitle}</div>
+                    <div class="case-meta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1rem; font-size: 0.9rem;">
+                        <div><strong>Advocate:</strong> ${caseItem.counselName}</div>
+                        <div><strong>Previous Hearing:</strong> ${caseItem.previousHearing}</div>
+                        <div><strong>Next Hearing:</strong> ${caseItem.nextHearing}</div>
+                        <div><strong>Status:</strong> ${caseItem.orders}</div>
+                        <div><strong>Freshness:</strong> <span style="color: ${caseItem.freshness === 'fresh' ? 'green' : caseItem.freshness === 'recent' ? 'orange' : 'red'}">${caseItem.freshness}</span></div>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--gray-medium); margin-top: 0.5rem;">
+                        Tracked on: ${caseItem.addedDate}
+                    </div>
+                    <div class="case-actions">
+                        <button class="btn btn-outline btn-sm" onclick="viewCaseDetails('${caseItem.id}')">View Details</button>
+                        <button class="btn btn-outline btn-sm" style="color: red; border-color: red;" onclick="removeCase('${caseItem.id}')">Untrack</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function deleteCase(id) {
-            if (confirm('Are you sure you want to delete this case?')) {
-                myCases = myCases.filter(c => c.id !== id);
-                localStorage.setItem('myCases', JSON.stringify(myCases));
-                loadMyCases();
+        async function removeCase(caseId) {
+            if (!confirm('Are you sure you want to untrack this case?')) return;
+            try {
+                await NyayaAPI.untrackCase(caseId);
+                await loadTrackedCases();
+            } catch (err) {
+                alert('Error: ' + err.message);
             }
         }
 
         function viewCaseDetails(id) {
             const caseItem = myCases.find(c => c.id === id);
             if (caseItem) {
-                alert(`Case Details:\n\nCase No: ${caseItem.caseNo}\nTitle: ${caseItem.caseTitle}\nCourt: ${caseItem.court.toUpperCase()}\nAdded: ${caseItem.addedDate}`);
+                alert(`Case Details:\n\nCase No: ${caseItem.caseNo}\nTitle: ${caseItem.caseTitle}\nCourt: ${caseItem.court.toUpperCase()}\nNext Hearing: ${caseItem.nextHearing}\nStatus: ${caseItem.orders}\nFreshness: ${caseItem.freshness}`);
             }
         }
 
-        function searchMyCases() {
+        async function searchMyCases() {
             const searchCaseNo = document.getElementById('searchCaseNo').value.toLowerCase();
             const searchCaseName = document.getElementById('searchCaseName').value.toLowerCase();
-            const searchAdvocate = document.getElementById('searchAdvocate').value.toLowerCase();
 
             const filtered = myCases.filter(c => {
                 return (
@@ -667,25 +686,24 @@
 
             if (filtered.length > 0) {
                 resultsTable.style.display = 'table';
-                resultsBody.innerHTML = filtered.map((c, index) => `
+                resultsBody.innerHTML = filtered.map(c => `
                     <tr style="border-bottom: 1px solid #ddd;">
                         <td style="padding: 0.75rem; border: 1px solid #ddd;">
-                            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #28a745; margin-right: 0.5rem;"></span>
-                            Synced
+                            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${c.freshness === 'fresh' ? '#28a745' : c.freshness === 'recent' ? '#ffc107' : '#dc3545'}; margin-right: 0.5rem;"></span>
+                            ${c.freshness}
                         </td>
                         <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.caseNo}</td>
                         <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.caseTitle}</td>
                         <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.court.toUpperCase()}</td>
-                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.nextHearing || 'N/A'}</td>
-                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.previousHearing || 'N/A'}</td>
-                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.orders || 'Pending'}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.nextHearing}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.previousHearing}</td>
+                        <td style="padding: 0.75rem; border: 1px solid #ddd;">${c.orders}</td>
                     </tr>
                 `).join('');
             } else {
-                resultsTable.style.display = 'none';
+                resultsTable.style.display = 'table';
+                resultsBody.innerHTML = '<tr><td colspan="7" style="padding: 1rem; text-align: center;">No matching cases found.</td></tr>';
             }
-
-            renderMyCases(filtered);
         }
 
         function filterByCourt(court) {
@@ -697,97 +715,19 @@
             }
         }
 
-        function selectOrderCourt(court) {
-            document.querySelectorAll('.court-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            console.log('Selected court for orders:', court);
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function selectSynopsisCourt(court) {
-            document.querySelectorAll('.court-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            console.log('Selected court for synopsis:', court);
-        }
-
-        function searchOrders() {
-            const caseNo = document.getElementById('orderCaseNo').value;
-            const caseTitle = document.getElementById('orderCaseTitle').value;
-            const partyName = document.getElementById('orderPartyName').value;
-
-            if (!caseNo && !caseTitle && !partyName) {
-                alert('Please enter at least one search criteria');
-                return;
-            }
-
-            alert('Searching orders...\n\nThis feature will be connected to the backend API.');
-        }
-
-        function printOrders() {
-            const userTier = localStorage.getItem('userTier');
-            const userType = localStorage.getItem('userType');
-
-            // Check if user can print (Premium+ only)
-            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
-                alert('Printing orders...\n\nThis will open the print dialog.');
-                // window.print();
-            } else {
-                alert('Print feature is available for Advocate Premium users only.\n\nUpgrade to Advocate Premium (₹599/month) to unlock printing.');
-            }
-        }
-
-        function printSynopsis(caseNo) {
-            const userTier = localStorage.getItem('userTier');
-
-            if (userTier === 'premium' || userTier === 'superpremium') {
-                alert(`Printing synopsis for case: ${caseNo}\n\nThis will open the print dialog.`);
-                // window.print();
-            } else {
-                alert('Print feature is available for Premium users only.');
-            }
-        }
-
-        function viewFullJudgement(caseNo) {
-            alert(`Opening full judgement for case: ${caseNo}\n\nThis will open the complete judgement document.`);
-        }
-
-        function updatePrintStatus() {
-            const userTier = localStorage.getItem('userTier');
-            const userType = localStorage.getItem('userType');
-            const ordersPrintStatus = document.getElementById('ordersPrintStatus');
-
-            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
-                ordersPrintStatus.innerHTML = '<strong style="color: #28a745;">Print Enabled</strong> - You can print orders and documents';
-            } else {
-                ordersPrintStatus.innerHTML = '<strong style="color: #dc3545;">Print Disabled</strong> - Upgrade to Advocate Premium (₹599+) to enable printing';
-            }
-        }
-
-        function initializeSynopsis() {
-            const userTier = localStorage.getItem('userTier');
-            const userType = localStorage.getItem('userType');
-            const synopsisSection = document.getElementById('synopsisSection');
-
-            // Show ONLY for Advocate Premium (₹599+)
-            if (userType === 'advocate' && (userTier === 'premium' || userTier === 'superpremium')) {
-                synopsisSection.style.display = 'block';
-            } else {
-                synopsisSection.style.display = 'none';
-            }
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            updatePrintStatus();
-            initializeSynopsis();
-        });
-
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
+        function searchOrders() { alert('Orders search coming soon.'); }
+        function printOrders() { window.print(); }
+        function selectOrderCourt(court) {}
+        function selectSynopsisCourt(court) {}
+        function viewFullJudgement(id) { alert('Full judgement view coming soon.'); }
+        function printSynopsis(id) { window.print(); }
     </script>
+
 </body>
 
 </html>
