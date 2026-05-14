@@ -516,21 +516,29 @@
             const userName = user ? user.name : (localStorage.getItem('userName') || 'User');
             document.getElementById('welcomeTitle').textContent = `Hi, ${userName}`;
 
-            // Update user menu
+            // Update user menu with full profile info
             const userMenu = document.getElementById('userMenu');
             const tier = NyayaAPI.getUserTier();
             const tierLabels = {
-                'free': 'Free User',
-                'individual': 'Individual',
-                'advocate_normal': 'Advocate',
-                'advocate_premium': 'Advocate Premium',
+                'free': '🆓 Free',
+                'individual': '💼 Individual',
+                'advocate_normal': '⚖️ Advocate',
+                'advocate_premium': '⭐ Premium',
             };
+            const userTypeIcon = user && user.user_type === 'advocate' ? '⚖️' : '👤';
+            const userTypeLabel = user && user.user_type === 'advocate' ? 'Advocate' : 'Litigant';
+            const phone = user ? (user.phone || '') : '';
+            const email = user ? (user.email || '') : '';
+
             userMenu.innerHTML = `
-                <div class="user-info">
-                    <span style="color: var(--white); font-size: 0.9rem;">${user ? (user.email || user.phone) : ''}</span>
-                    <span class="user-tier-badge">${tierLabels[tier] || tier}</span>
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <div style="background: rgba(255,255,255,0.15); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem; color: white; line-height: 1.4;">
+                        <strong>${userName}</strong><br>
+                        ${userTypeIcon} ${userTypeLabel} | ${tierLabels[tier] || tier}<br>
+                        ${phone ? '📱 ' + phone : ''}${email ? ' | ✉️ ' + email : ''}
+                    </div>
+                    <button class="btn btn-logout" onclick="logout()" style="padding: 6px 12px; font-size: 0.8rem;">Logout</button>
                 </div>
-                <button class="btn btn-logout" onclick="logout()">Logout</button>
             `;
 
             // Show synopsis section for premium users
