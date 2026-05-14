@@ -106,16 +106,14 @@
     </div>
   </section>
 
+  <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/tier-renderer.js"></script>
   <script src="js/print-control.js"></script>
   <script>
     // Check if user is logged in and redirect to dashboard
     document.addEventListener('DOMContentLoaded', () => {
-      const { isLoggedIn } = checkAuth();
-
-      if (isLoggedIn) {
-        // Redirect logged-in users to their dashboard
+      if (NyayaAPI.isLoggedIn()) {
         window.location.href = 'my-dashboard.html';
         return;
       }
@@ -125,130 +123,57 @@
       userMenu.innerHTML = `
         <button class="btn btn-outline" onclick="window.location.href='login.html'">Login / Register</button>
       `;
-
-      // Render case cards
-      renderCaseCards();
     });
 
-    function renderCaseCards() {
-      const userTier = localStorage.getItem('userTier') || 'unregistered';
-      const caseResults = document.getElementById('caseResults');
+    // Search handler
+    document.querySelector('.search-form .btn').addEventListener('click', async () => {
+      const input = document.querySelector('.search-input').value.trim();
+      if (!input) {
+        alert('Please enter a case number to search.');
+        return;
+      }
 
-      const cases = [
-        {
-          number: "AFT/DEL/2023/1234",
-          date: "15 Feb 2026",
-          title: "Rajesh Kumar vs. Union of India",
-          bench: "Justice A. Sharma",
-          type: "Service Matter",
-          status: "For Hearing",
-          counsel: "Adv. S. Patel",
-          venue: "Court Room No. 5"
-        },
-        {
-          number: "CGAT/DEL/2024/5678",
-          date: "18 Feb 2026",
-          title: "Suresh Patel vs. Ministry of Defence",
-          bench: "Justice B. Mehta",
-          type: "Pension Dispute",
-          status: "Disposed",
-          counsel: "Adv. R. Singh",
-          venue: "Court Room No. 3"
-        },
-        {
-          number: "AFT/DEL/2023/9012",
-          date: "20 Feb 2026",
-          title: "Meena Devi vs. Indian Army",
-          bench: "Justice C. Reddy",
-          type: "Service Matter",
-          status: "For Hearing",
-          counsel: "Adv. P. Kumar",
-          venue: "Court Room No. 7"
-        }
-      ];
+      if (!NyayaAPI.isLoggedIn()) {
+        alert('Please login to search cases.');
+        window.location.href = 'login.html';
+        return;
+      }
 
-      caseResults.innerHTML = '';
+      const btn = document.querySelector('.search-form .btn');
+      btn.disabled = true;
+      btn.textContent = 'Searching...';
 
-      cases.forEach(caseItem => {
-        const card = document.createElement('div');
-        card.className = `case-card tier-${userTier}`;
+      try {
+        const result = await NyayaAPI.searchCase('aft_del', input);
+        const caseResults = document.getElementById('caseResults');
 
-        let html = `
-          <div class="case-header">
-            <span class="case-number">${caseItem.number}</span>
-            <span class="case-date">${caseItem.date}</span>
-          </div>
-          <div class="case-title">
-            <span>${caseItem.title}</span>
-          </div>
-        `;
-
-        // Unpaid+ content
-        if (userTier === 'unpaid' || userTier === 'paid') {
-          html += `
-            <div class="case-bench">Bench: ${caseItem.bench}</div>
-            <div class="case-type">Type: ${caseItem.type}</div>
-            <div class="case-status status-${caseItem.status.toLowerCase().replace(' ', '-')}">
-              ${caseItem.status}
+        if (result) {
+          caseResults.innerHTML = `
+            <div class="case-card" style="margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; border-left: 4px solid var(--gold-primary);">
+              <div class="case-header" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span class="case-number" style="font-weight: 700; color: var(--navy-dark);">${result.case_number}</span>
+                <span style="color: green; font-weight: 600;">${result.freshness || 'fresh'}</span>
+              </div>
+              <div class="case-title" style="margin-bottom: 0.5rem;">${result.case_title || ''}</div>
+              <div style="font-size: 0.9rem; color: #555;">
+                <p><strong>Petitioner:</strong> ${result.petitioner || 'N/A'}</p>
+                <p><strong>Respondent:</strong> ${result.respondent || 'N/A'}</p>
+                <p><strong>Advocate:</strong> ${result.advocate_petitioner || 'N/A'}</p>
+                <p><strong>Next Hearing:</strong> ${result.next_hearing_date || 'N/A'}</p>
+                <p><strong>Court:</strong> ${result.court_code || 'N/A'}</p>
+              </div>
             </div>
           `;
+        } else {
+          caseResults.innerHTML = '<p style="margin-top: 1rem; color: #666;">No case found with that number.</p>';
         }
-
-        // Paid-only content
-        if (userTier === 'paid') {
-          html += `
-            <div class="case-counsel">Counsel: ${caseItem.counsel}</div>
-            <div class="case-venue">Venue: ${caseItem.venue}</div>
-          `;
-        }
-
-        // CTA buttons
-        if (userTier === 'unregistered') {
-          html += `
-            <div class="case-cta">
-              <button class="btn btn-outline btn-sm" onclick="window.location.href='login.html'">Login to View Details</button>
-              <span class="lock-icon">🔒</span>
-            </div>
-          `;
-        } else if (userTier === 'unpaid') {
-          html += `
-            <div class="case-cta">
-              <button class="btn btn-outline btn-sm" onclick="showUpgradeModal()">Unlock Full Access</button>
-              <span class="lock-icon">🔒</span>
-              <span class="upgrade-prompt">Upgrade to see counsel & venue</span>
-            </div>
-          `;
-        } else if (userTier === 'paid') {
-          html += `
-            <div class="case-cta">
-              <button class="btn-print" onclick="window.print()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 9V2H18V9M6 15H4V22H20V15H18M18 9H6V15H18V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Print
-              </button>
-              <button class="btn-copy" onclick="copyCase('${caseItem.number}', '${caseItem.title}')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M8 8C8 6.89543 8.89543 6 10 6H18C19.1046 6 20 6.89543 20 8V16C20 17.1046 19.1046 18 18 18H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M16 4H8C6.89543 4 6 4.89543 6 6V14C6 15.1046 6.89543 16 8 16H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Copy
-              </button>
-            </div>
-          `;
-        }
-
-        card.innerHTML = html;
-        caseResults.appendChild(card);
-      });
-    }
-
-    function copyCase(number, title) {
-      const text = `${number} - ${title}`;
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Case details copied to clipboard!');
-      });
-    }
+      } catch (err) {
+        document.getElementById('caseResults').innerHTML = `<p style="margin-top: 1rem; color: red;">Error: ${err.message}</p>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Search';
+      }
+    });
   </script>
 </body>
 
