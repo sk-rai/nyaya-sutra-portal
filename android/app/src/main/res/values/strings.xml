@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nyaya Sarathi</string>
+    <string name="greeting_format">Hello, %1$s</string>
+    <string name="feature_locked_message">This feature requires %1$s subscription</string>
+    <string name="profile_title">Profile</string>
+    <string name="logout">Logout</string>
+    <string name="expand_collapse">Expand/Collapse</string>
+    <string name="current_plan">Current</string>
+    <string name="btn_subscribe">Subscribe</string>
+    <string name="btn_view">View</string>
+
+    <!-- Case Search -->
+    <string name="case_search_title">Case Search</string>
+    <string name="hint_select_court">Select Court</string>
+    <string name="hint_case_number">Case Number</string>
+    <string name="btn_search">Search</string>
+    <string name="btn_track">Track</string>
+    <string name="btn_untrack">Untrack</string>
+    <string name="empty_case_search">No cases found</string>
+    <string name="error_select_court">Please select a court</string>
+    <string name="error_enter_case_number">Please enter a case number</string>
+    <string name="next_hearing_format">Next Hearing: %1$s</string>
+    <string name="case_tracked_success">Case tracked successfully</string>
+
+    <!-- Tracked Cases -->
+    <string name="tracked_cases_title">My Tracked Cases</string>
+    <string name="empty_tracked_cases">No tracked cases yet.\nSearch for cases to start tracking.</string>
+    <string name="stale_data_banner">Showing cached data. Connect to the internet for latest updates.</string>
+
+    <!-- Court Directory -->
+    <string name="court_directory_title">Court Directory</string>
+
+    <!-- Advocate Directory -->
+    <string name="advocate_directory_title">Advocate Directory</string>
+    <string name="hint_search_advocate">Search by name</string>
+    <string name="hint_filter_by_court">Filter by Court</string>
+    <string name="empty_advocate_list">No advocates found</string>
+
+    <!-- Subscription -->
+    <string name="subscription_title">Subscription Plans</string>
+
+    <!-- Court Calendar -->
+    <string name="court_calendar_title">Court Calendar</string>
+    <string name="hint_select_court_type">Select Court Type</string>
+    <string name="calendar_legend_title">Legend</string>
+    <string name="calendar_working_day">Working Day</string>
+    <string name="calendar_holiday">Holiday</string>
+    <string name="calendar_vacation">Vacation / Half Day</string>
+
+    <!-- Legal Resources -->
+    <string name="bare_acts_title">Bare Acts</string>
+    <string name="hint_search_legislation">Search legislation</string>
+    <string name="empty_bare_acts">No legislation found</string>
+    <string name="legal_forms_title">Legal Forms</string>
+
+    <!-- Police Authorities -->
+    <string name="police_authorities_title">Police Authorities</string>
+    <string name="hint_select_state">Select State/UT</string>
+    <string name="hint_select_district">Select District</string>
+    <string name="empty_police_authorities">Select a state and district to view authorities</string>
+
+    <!-- Advocate Tools -->
+    <string name="advocate_tools_title">Advocate Tools</string>
+    <string name="register_court_matter_title">Register Court Matter</string>
+    <string name="hint_matter_details">Matter Details</string>
+    <string name="btn_register_matter">Register Matter</string>
+    <string name="display_board_title">Display Board</string>
+    <string name="placeholder_display_board">Live display board data will appear here.\nSelect a court to view current proceedings.</string>
+    <string name="judges_roster_title">Judges Roster</string>
+    <string name="placeholder_judges_roster">Current judges roster will appear here.\nSelect a court to view assigned judges.</string>
+    <string name="cause_list_title">Daily Cause List</string>
+    <string name="placeholder_cause_list">Daily cause list will appear here.\nSelect a court to view today\'s cases.</string>
+    <string name="e_filing_title">e-Filing</string>
+    <string name="e_filing_description">Access the court\'s e-Filing portal to submit documents electronically.</string>
+    <string name="e_gate_pass_title">e-Gate Pass</string>
+    <string name="e_gate_pass_description">Access the court\'s e-Gate Pass portal for entry authorization.</string>
+    <string name="btn_open_portal">Open Portal</string>
+</resources>

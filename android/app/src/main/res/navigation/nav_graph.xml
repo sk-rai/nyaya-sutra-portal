@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <!-- Auth Flow -->
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.nyayasarathi.app.ui.splash.SplashFragment"
+        android:label="Splash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splash_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_splash_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.nyayasarathi.app.ui.auth.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_login_to_otp"
+            app:destination="@id/otpVerifyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.nyayasarathi.app.ui.auth.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_register_to_otp"
+            app:destination="@id/otpVerifyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/otpVerifyFragment"
+        android:name="com.nyayasarathi.app.ui.auth.OtpVerifyFragment"
+        android:label="Verify OTP"
+        tools:layout="@layout/fragment_otp_verify">
+        <argument
+            android:name="identifier"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_otp_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Main Flow -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.nyayasarathi.app.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_home_to_caseSearch"
+            app:destination="@id/caseSearchFragment" />
+        <action
+            android:id="@+id/action_home_to_trackedCases"
+            app:destination="@id/trackedCasesFragment" />
+        <action
+            android:id="@+id/action_home_to_courtDirectory"
+            app:destination="@id/courtDirectoryFragment" />
+        <action
+            android:id="@+id/action_home_to_advocateDirectory"
+            app:destination="@id/advocateDirectoryFragment" />
+        <action
+            android:id="@+id/action_home_to_subscription"
+            app:destination="@id/subscriptionFragment" />
+        <action
+            android:id="@+id/action_home_to_calendar"
+            app:destination="@id/courtCalendarFragment" />
+        <action
+            android:id="@+id/action_home_to_advocateTools"
+            app:destination="@id/advocateToolsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/caseSearchFragment"
+        android:name="com.nyayasarathi.app.ui.cases.CaseSearchFragment"
+        android:label="Case Search"
+        tools:layout="@layout/fragment_case_search" />
+
+    <fragment
+        android:id="@+id/trackedCasesFragment"
+        android:name="com.nyayasarathi.app.ui.cases.TrackedCasesFragment"
+        android:label="My Cases"
+        tools:layout="@layout/fragment_tracked_cases" />
+
+    <fragment
+        android:id="@+id/courtDirectoryFragment"
+        android:name="com.nyayasarathi.app.ui.courts.CourtDirectoryFragment"
+        android:label="Courts"
+        tools:layout="@layout/fragment_court_directory" />
+
+    <fragment
+        android:id="@+id/advocateDirectoryFragment"
+        android:name="com.nyayasarathi.app.ui.advocates.AdvocateDirectoryFragment"
+        android:label="Advocates"
+        tools:layout="@layout/fragment_advocate_directory" />
+
+    <fragment
+        android:id="@+id/subscriptionFragment"
+        android:name="com.nyayasarathi.app.ui.subscription.SubscriptionFragment"
+        android:label="Subscription"
+        tools:layout="@layout/fragment_subscription" />
+
+    <fragment
+        android:id="@+id/courtCalendarFragment"
+        android:name="com.nyayasarathi.app.ui.calendar.CourtCalendarFragment"
+        android:label="Calendar"
+        tools:layout="@layout/fragment_court_calendar" />
+
+    <fragment
+        android:id="@+id/advocateToolsFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.AdvocateToolsFragment"
+        android:label="Advocate Tools"
+        tools:layout="@layout/fragment_advocate_tools">
+        <action
+            android:id="@+id/action_advocateTools_to_registerMatter"
+            app:destination="@id/registerCourtMatterFragment" />
+        <action
+            android:id="@+id/action_advocateTools_to_displayBoard"
+            app:destination="@id/displayBoardFragment" />
+        <action
+            android:id="@+id/action_advocateTools_to_judgesRoster"
+            app:destination="@id/judgesRosterFragment" />
+        <action
+            android:id="@+id/action_advocateTools_to_causeList"
+            app:destination="@id/causeListFragment" />
+        <action
+            android:id="@+id/action_advocateTools_to_eFiling"
+            app:destination="@id/eFilingFragment" />
+        <action
+            android:id="@+id/action_advocateTools_to_eGatePass"
+            app:destination="@id/eGatePassFragment" />
+    </fragment>
+
+    <!-- Advocate Tool Sub-screens -->
+    <fragment
+        android:id="@+id/registerCourtMatterFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.RegisterCourtMatterFragment"
+        android:label="Register Court Matter"
+        tools:layout="@layout/fragment_register_court_matter" />
+
+    <fragment
+        android:id="@+id/displayBoardFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.DisplayBoardFragment"
+        android:label="Display Board"
+        tools:layout="@layout/fragment_display_board" />
+
+    <fragment
+        android:id="@+id/judgesRosterFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.JudgesRosterFragment"
+        android:label="Judges Roster"
+        tools:layout="@layout/fragment_judges_roster" />
+
+    <fragment
+        android:id="@+id/causeListFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.CauseListFragment"
+        android:label="Cause List"
+        tools:layout="@layout/fragment_cause_list" />
+
+    <fragment
+        android:id="@+id/eFilingFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.EFilingFragment"
+        android:label="e-Filing"
+        tools:layout="@layout/fragment_e_filing" />
+
+    <fragment
+        android:id="@+id/eGatePassFragment"
+        android:name="com.nyayasarathi.app.ui.advocate_tools.EGatePassFragment"
+        android:label="e-Gate Pass"
+        tools:layout="@layout/fragment_e_gate_pass" />
+
+    <!-- Legal Resources -->
+    <fragment
+        android:id="@+id/bareActsFragment"
+        android:name="com.nyayasarathi.app.ui.legal.BareActsFragment"
+        android:label="Bare Acts"
+        tools:layout="@layout/fragment_bare_acts" />
+
+    <fragment
+        android:id="@+id/legalFormsFragment"
+        android:name="com.nyayasarathi.app.ui.legal.LegalFormsFragment"
+        android:label="Legal Forms"
+        tools:layout="@layout/fragment_legal_forms" />
+
+    <!-- Police Authorities -->
+    <fragment
+        android:id="@+id/policeAuthoritiesFragment"
+        android:name="com.nyayasarathi.app.ui.police.PoliceAuthoritiesFragment"
+        android:label="Police Authorities"
+        tools:layout="@layout/fragment_police_authorities" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.nyayasarathi.app.ui.home.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+</navigation>
