@@ -61,6 +61,11 @@ if os.path.isfile('schema/003_fix_court_urls.sql'):
         sql = f.read()
         cur2.execute(sql)
     print('Court URLs updated.')
+if os.path.isfile('schema/004_upload_log.sql'):
+    with open('schema/004_upload_log.sql', 'r') as f:
+        sql = f.read()
+        cur2.execute(sql)
+    print('Upload log table created.')
 cur2.close()
 
 cur.close()

@@ -180,6 +180,9 @@ def upload_causelist():
 
     Accepts a PDF file upload + court_code parameter.
     Parses the PDF using the AFT/CAT parser and stores all cases in the DB.
+    Checks file hash to prevent duplicate processing.
+
+    Any logged-in user can upload (not restricted to admin).
 
     Form data:
         file: PDF file (multipart/form-data)
@@ -189,7 +192,8 @@ def upload_causelist():
     Returns:
         Summary of parsed and stored cases.
     """
-    require_admin()
+    import hashlib
+    from flask_jwt_extended import get_jwt_identity
 
     # Validate file upload
     if "file" not in request.files:
@@ -216,9 +220,28 @@ def upload_causelist():
     if pdf_content[:4] != b"%PDF":
         raise ValidationError("Uploaded file is not a valid PDF.")
 
+    # Calculate file hash for duplicate detection
+    file_hash = hashlib.sha256(pdf_content).hexdigest()
+
+    # Check if this file was already processed
+    existing_upload = db.session.execute(
+        db.text("SELECT id, cases_parsed, created_at FROM upload_log WHERE file_hash = :hash"),
+        {"hash": file_hash}
+    ).fetchone()
+
+    if existing_upload:
+        return success_response({
+            "message": "This file has already been processed.",
+            "status": "duplicate",
+            "filename": file.filename,
+            "court_code": court_code,
+            "cases_found": existing_upload[1] if existing_upload[1] else 0,
+            "uploaded_at": str(existing_upload[2]) if existing_upload[2] else None,
+        })
+
     logger.info(
         f"[upload] Processing cause list PDF for {court_code} "
-        f"({len(pdf_content)} bytes, filename={file.filename})"
+        f"({len(pdf_content)} bytes, filename={file.filename}, hash={file_hash[:12]}...)"
     )
 
     # Get the appropriate parser
@@ -234,10 +257,14 @@ def upload_causelist():
     results = scraper.parse(pdf_content)
 
     if not results:
+        # Log failed upload
+        self._log_upload(file_hash, file.filename, court_code, hearing_date_str,
+                        len(pdf_content), 0, 0, 0, "failed", "No cases found in PDF")
         return success_response({
             "message": "PDF parsed but no cases found. Check the PDF format.",
+            "status": "no_cases",
             "cases_found": 0,
-            "cases_stored": 0,
+            "cases_new": 0,
         })
 
     # Store parsed cases in the database
@@ -312,6 +339,32 @@ def upload_causelist():
             logger.error(f"[upload] Error storing case {case_number}: {e}")
             errors += 1
 
+    # Log the upload
+    try:
+        user_id = get_jwt_identity()
+        db.session.execute(
+            db.text("""
+                INSERT INTO upload_log (file_hash, filename, court_code, hearing_date,
+                    file_size_bytes, cases_parsed, cases_new, cases_updated, uploaded_by, status)
+                VALUES (:hash, :filename, :court_code, :hearing_date,
+                    :file_size, :cases_parsed, :cases_new, :cases_updated, :user_id, 'success')
+            """),
+            {
+                "hash": file_hash,
+                "filename": file.filename,
+                "court_code": court_code,
+                "hearing_date": hearing_date_str or None,
+                "file_size": len(pdf_content),
+                "cases_parsed": len(results),
+                "cases_new": stored,
+                "cases_updated": updated,
+                "user_id": user_id,
+            }
+        )
+    except Exception as e:
+        # upload_log table might not exist yet — non-fatal
+        logger.warning(f"[upload] Could not log upload: {e}")
+
     db.session.commit()
 
     logger.info(
@@ -321,6 +374,7 @@ def upload_causelist():
 
     return success_response({
         "message": f"Cause list processed successfully for {court_code}.",
+        "status": "success",
         "filename": file.filename,
         "court_code": court_code,
         "hearing_date": hearing_date_str or None,
