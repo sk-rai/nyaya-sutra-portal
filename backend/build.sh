@@ -42,8 +42,26 @@ if not tables_exist:
             sql = f.read()
             cur.execute(sql)
         print('Functions and policies applied.')
+
+# Always apply URL fixes (idempotent)
+if os.path.isfile('schema/003_fix_court_urls.sql'):
+    print('Applying court URL fixes...')
+    with open('schema/003_fix_court_urls.sql', 'r') as f:
+        sql = f.read()
+        cur.execute(sql)
+    print('Court URLs fixed.')
+
 else:
     print('Tables already exist, skipping schema.')
+
+# Always apply URL fixes even if tables existed
+cur2 = conn.cursor()
+if os.path.isfile('schema/003_fix_court_urls.sql'):
+    with open('schema/003_fix_court_urls.sql', 'r') as f:
+        sql = f.read()
+        cur2.execute(sql)
+    print('Court URLs updated.')
+cur2.close()
 
 cur.close()
 conn.close()

@@ -6,6 +6,7 @@ tracked case retrieval, and case relationship management.
 
 import logging
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from flask import current_app
 
@@ -58,11 +59,138 @@ class CaseCacheService:
             result["freshness"] = freshness
             return result
 
-        # TODO: Integrate scraper here to fetch case on cache miss.
-        # For now, return a not-found error since scrapers aren't built yet.
+        # Case not in cache — trigger scraper to fetch from court website
+        result = self._scrape_and_cache(court_code, case_number)
+        if result:
+            return result
+
         raise NotFoundError(
-            "Case not found in cache. Scraper integration pending."
+            f"Case {case_number} not found in {court_code} cause list."
         )
+
+    def _scrape_and_cache(self, court_code: str, case_number: str) -> Optional[dict]:
+        """Trigger scraper to fetch case from court website and cache it.
+
+        Downloads the cause list PDF, parses ALL cases from it,
+        stores them in cache, and returns the matching case.
+
+        Args:
+            court_code: Court code (e.g., 'aft_del').
+            case_number: Case number to search for.
+
+        Returns:
+            Dict with case data if found, None otherwise.
+        """
+        from ..scrapers.registry import ScraperFactory
+
+        factory = ScraperFactory()
+        scraper = factory.get_scraper(court_code.replace("_", "_"))
+
+        if not scraper:
+            logger.warning(f"No scraper available for court: {court_code}")
+            return None
+
+        try:
+            # Fetch and parse the PDF
+            raw_content = scraper.fetch_pdf(court_code, case_number)
+            if not raw_content:
+                logger.info(f"No PDF content fetched for {court_code}")
+                return None
+
+            results = scraper.parse(raw_content)
+            if not results:
+                logger.info(f"No cases parsed from {court_code} PDF")
+                return None
+
+            logger.info(f"Parsed {len(results)} cases from {court_code} cause list")
+
+            # Store ALL parsed cases in cache (benefits future searches)
+            matched_case = None
+            case_number_normalized = case_number.strip().lower().replace(" ", "")
+
+            for scrape_result in results:
+                structured = scrape_result.structured
+                scraped_case_number = structured.get("case_number", "")
+
+                if not scraped_case_number:
+                    continue
+
+                # Check if this case already exists in cache
+                existing = CaseCache.query.filter_by(
+                    court_code=court_code,
+                    case_number=scraped_case_number,
+                ).first()
+
+                if existing:
+                    # Update existing cache entry
+                    existing.petitioner = structured.get("petitioner") or existing.petitioner
+                    existing.respondent = structured.get("respondent") or existing.respondent
+                    existing.advocate_petitioner = structured.get("advocate_petitioner") or existing.advocate_petitioner
+                    existing.advocate_respondent = structured.get("advocate_respondent") or existing.advocate_respondent
+                    existing.bench = structured.get("bench") or existing.bench
+                    existing.item_number = structured.get("item_number") or existing.item_number
+                    existing.case_title = structured.get("case_title") or existing.case_title
+                    existing.raw_scraped_data = {"raw": scrape_result.raw_data}
+                    existing.parse_confidence = scrape_result.confidence
+                    existing.fetched_at = datetime.now(timezone.utc)
+                    existing.last_refreshed_at = datetime.now(timezone.utc)
+                    existing.scraper_version = scraper.SCRAPER_VERSION
+
+                    case_obj = existing
+                else:
+                    # Create new cache entry
+                    case_obj = CaseCache(
+                        court_code=court_code,
+                        case_number=scraped_case_number,
+                        case_title=structured.get("case_title", ""),
+                        petitioner=structured.get("petitioner", ""),
+                        respondent=structured.get("respondent", ""),
+                        advocate_petitioner=structured.get("advocate_petitioner", ""),
+                        advocate_respondent=structured.get("advocate_respondent", ""),
+                        bench=structured.get("bench", ""),
+                        item_number=structured.get("item_number", ""),
+                        case_status="pending",
+                        parse_confidence=scrape_result.confidence,
+                        raw_scraped_data={"raw": scrape_result.raw_data},
+                        extra_fields=scrape_result.extra_fields,
+                        source_url=scrape_result.source_url,
+                        scraper_version=scraper.SCRAPER_VERSION,
+                        fetched_at=datetime.now(timezone.utc),
+                    )
+                    db.session.add(case_obj)
+
+                # Check if this is our target case
+                scraped_normalized = scraped_case_number.strip().lower().replace(" ", "")
+                if scraped_normalized == case_number_normalized:
+                    matched_case = case_obj
+
+            db.session.commit()
+
+            if matched_case:
+                result = matched_case.to_dict()
+                result["freshness"] = "fresh"
+                return result
+
+            # Fuzzy match if exact match failed
+            for scrape_result in results:
+                scraped_num = scrape_result.structured.get("case_number", "").strip().lower().replace(" ", "")
+                if case_number_normalized in scraped_num or scraped_num in case_number_normalized:
+                    # Find the cached version
+                    case_obj = CaseCache.query.filter_by(
+                        court_code=court_code,
+                        case_number=scrape_result.structured.get("case_number"),
+                    ).first()
+                    if case_obj:
+                        result = case_obj.to_dict()
+                        result["freshness"] = "fresh"
+                        return result
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Scraper failed for {court_code}/{case_number}: {e}", exc_info=True)
+            db.session.rollback()
+            return None
 
     def get_freshness(self, fetched_at: datetime) -> str:
         """Calculate freshness indicator based on fetched_at timestamp.
