@@ -4,19 +4,25 @@ Endpoints:
 - GET /api/admin/scraper-health — Get scraper health status
 - GET /api/admin/stats — Get platform statistics (users, tiers, etc.)
 - GET /api/admin/users — List all users with tier info
+- POST /api/admin/upload-causelist — Upload and parse a cause list PDF
 """
+
+import logging
+from datetime import datetime, timezone
 
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy import func
 
 from ..extensions import db
-from ..middleware.error_handler import TierInsufficientError
+from ..middleware.error_handler import TierInsufficientError, ValidationError
 from ..models.user import User, UserSession
 from ..models.subscription import Subscription
 from ..models.case import CaseCache
 from ..models.tracking import UserTrackedCase
 from ..utils.response import success_response
+
+logger = logging.getLogger(__name__)
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -164,4 +170,162 @@ def list_users():
             "total": total,
             "pages": (total + per_page - 1) // per_page,
         },
+    })
+
+
+@admin_bp.route("/upload-causelist", methods=["POST"])
+@jwt_required()
+def upload_causelist():
+    """Upload a cause list PDF for parsing and database seeding.
+
+    Accepts a PDF file upload + court_code parameter.
+    Parses the PDF using the AFT/CAT parser and stores all cases in the DB.
+
+    Form data:
+        file: PDF file (multipart/form-data)
+        court_code: Court code (e.g., 'aft_del', 'cat_del')
+        hearing_date: Optional hearing date (YYYY-MM-DD) for the cause list
+
+    Returns:
+        Summary of parsed and stored cases.
+    """
+    require_admin()
+
+    # Validate file upload
+    if "file" not in request.files:
+        raise ValidationError("No file uploaded. Please attach a PDF file.")
+
+    file = request.files["file"]
+    if not file.filename:
+        raise ValidationError("No file selected.")
+
+    if not file.filename.lower().endswith(".pdf"):
+        raise ValidationError("Only PDF files are accepted.")
+
+    court_code = request.form.get("court_code", "").strip()
+    if not court_code:
+        raise ValidationError("court_code is required.")
+
+    hearing_date_str = request.form.get("hearing_date", "").strip()
+
+    # Read the PDF content
+    pdf_content = file.read()
+    if not pdf_content:
+        raise ValidationError("Uploaded file is empty.")
+
+    if pdf_content[:4] != b"%PDF":
+        raise ValidationError("Uploaded file is not a valid PDF.")
+
+    logger.info(
+        f"[upload] Processing cause list PDF for {court_code} "
+        f"({len(pdf_content)} bytes, filename={file.filename})"
+    )
+
+    # Get the appropriate parser
+    from ..scrapers.registry import ScraperFactory
+
+    factory = ScraperFactory()
+    scraper = factory.get_scraper(court_code)
+
+    if not scraper:
+        raise ValidationError(f"No parser available for court: {court_code}")
+
+    # Parse the PDF
+    results = scraper.parse(pdf_content)
+
+    if not results:
+        return success_response({
+            "message": "PDF parsed but no cases found. Check the PDF format.",
+            "cases_found": 0,
+            "cases_stored": 0,
+        })
+
+    # Store parsed cases in the database
+    stored = 0
+    updated = 0
+    errors = 0
+
+    for scrape_result in results:
+        structured = scrape_result.structured
+        case_number = structured.get("case_number", "").strip()
+
+        if not case_number:
+            errors += 1
+            continue
+
+        try:
+            # Check if case already exists
+            existing = CaseCache.query.filter_by(
+                court_code=court_code,
+                case_number=case_number,
+            ).first()
+
+            if existing:
+                # Update existing record
+                existing.petitioner = structured.get("petitioner") or existing.petitioner
+                existing.respondent = structured.get("respondent") or existing.respondent
+                existing.advocate_petitioner = structured.get("advocate_petitioner") or existing.advocate_petitioner
+                existing.advocate_respondent = structured.get("advocate_respondent") or existing.advocate_respondent
+                existing.bench = structured.get("bench") or existing.bench
+                existing.item_number = structured.get("item_number") or existing.item_number
+                existing.case_title = structured.get("case_title") or existing.case_title
+                existing.raw_scraped_data = {"raw": scrape_result.raw_data, "source": file.filename}
+                existing.parse_confidence = scrape_result.confidence
+                existing.fetched_at = datetime.now(timezone.utc)
+                existing.last_refreshed_at = datetime.now(timezone.utc)
+                existing.scraper_version = scraper.SCRAPER_VERSION
+                if hearing_date_str:
+                    try:
+                        existing.next_hearing_date = datetime.strptime(hearing_date_str, "%Y-%m-%d").date()
+                    except ValueError:
+                        pass
+                updated += 1
+            else:
+                # Create new case
+                case_obj = CaseCache(
+                    court_code=court_code,
+                    case_number=case_number,
+                    case_title=structured.get("case_title", ""),
+                    petitioner=structured.get("petitioner", ""),
+                    respondent=structured.get("respondent", ""),
+                    advocate_petitioner=structured.get("advocate_petitioner", ""),
+                    advocate_respondent=structured.get("advocate_respondent", ""),
+                    bench=structured.get("bench", ""),
+                    item_number=structured.get("item_number", ""),
+                    case_status="pending",
+                    parse_confidence=scrape_result.confidence,
+                    raw_scraped_data={"raw": scrape_result.raw_data, "source": file.filename},
+                    extra_fields=scrape_result.extra_fields,
+                    source_url=f"upload:{file.filename}",
+                    scraper_version=scraper.SCRAPER_VERSION,
+                    fetched_at=datetime.now(timezone.utc),
+                )
+                if hearing_date_str:
+                    try:
+                        case_obj.next_hearing_date = datetime.strptime(hearing_date_str, "%Y-%m-%d").date()
+                    except ValueError:
+                        pass
+                db.session.add(case_obj)
+                stored += 1
+
+        except Exception as e:
+            logger.error(f"[upload] Error storing case {case_number}: {e}")
+            errors += 1
+
+    db.session.commit()
+
+    logger.info(
+        f"[upload] Complete for {court_code}: "
+        f"parsed={len(results)}, stored={stored}, updated={updated}, errors={errors}"
+    )
+
+    return success_response({
+        "message": f"Cause list processed successfully for {court_code}.",
+        "filename": file.filename,
+        "court_code": court_code,
+        "hearing_date": hearing_date_str or None,
+        "cases_found": len(results),
+        "cases_new": stored,
+        "cases_updated": updated,
+        "errors": errors,
     })
